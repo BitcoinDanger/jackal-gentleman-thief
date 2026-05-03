@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>JACKAL — The Gentleman Thief</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=Share+Tech+Mono&display=swap');
+
+:root {
+  --red:#c8233a; --red2:#e8354e; --redg:rgba(200,35,58,0.4);
+  --blue:#2563c8; --blue2:#4a90e2;
+  --gold:#c9993a; --gold2:#f0c060;
+  --dark:#08080e; --dark2:#10101a; --dark3:#181828; --dark4:#20203a;
+  --text:#e8e0d8; --muted:#7a7068; --green:#2ab870; --white:#f0ece8;
+  --purple:#7c3aed;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--dark);}
+body{font-family:'Share Tech Mono',monospace;color:var(--text);}
+
+/* SCREENS */
+.screen{display:none;width:100%;height:100vh;position:relative;overflow:hidden;}
+.screen.active{display:flex;flex-direction:column;}
+
+/* ===================== SPLASH ===================== */
+#splash{
+  align-items:center;justify-content:flex-end;padding-bottom:36px;
+  background:linear-gradient(170deg,#0a0010 0%,#08080e 40%,#1a0008 100%);
+}
+#splash::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(90deg,transparent 0,transparent 60px,rgba(200,35,58,0.03) 60px,rgba(200,35,58,0.03) 61px),
+             repeating-linear-gradient(0deg,transparent 0,transparent 60px,rgba(200,35,58,0.03) 60px,rgba(200,35,58,0.03) 61px);
+}
+.s-spotlight{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:320px;height:560px;background:radial-gradient(ellipse at 50% 80%,rgba(200,35,58,0.22) 0%,transparent 70%);pointer-events:none;}
+.s-char{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:min(360px,88vw);filter:drop-shadow(-15px 0 50px rgba(200,35,58,0.5)) drop-shadow(15px 0 35px rgba(37,99,200,0.3));animation:charFloat 4s ease-in-out infinite;z-index:1;}
+@keyframes charFloat{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-10px)}}
+.s-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:100%;padding:0 20px;}
+.s-eye{font-size:9px;letter-spacing:0.5em;color:var(--muted);margin-bottom:6px;text-transform:uppercase;}
+.s-title{font-family:'Cinzel',serif;font-size:clamp(46px,13vw,86px);font-weight:900;color:var(--white);letter-spacing:0.08em;line-height:.9;text-align:center;text-shadow:0 0 40px rgba(200,35,58,.7),0 0 80px rgba(200,35,58,.3);animation:tpulse 3s ease-in-out infinite;}
+@keyframes tpulse{0%,100%{text-shadow:0 0 40px rgba(200,35,58,.7),0 0 80px rgba(200,35,58,.3)}50%{text-shadow:0 0 60px rgba(200,35,58,.9),0 0 120px rgba(200,35,58,.5)}}
+.s-sub{font-family:'Crimson Pro',serif;font-style:italic;font-size:15px;color:var(--gold);letter-spacing:.25em;margin:8px 0 24px;}
+.s-div{display:flex;align-items:center;gap:12px;margin-bottom:22px;width:100%;max-width:280px;}
+.s-div::before,.s-div::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.s-div span{color:var(--gold);font-size:13px;}
+.btn-p{width:100%;max-width:280px;padding:15px;background:linear-gradient(135deg,var(--red),var(--red2));border:none;color:var(--white);font-family:'Cinzel',serif;font-size:13px;font-weight:700;letter-spacing:.3em;cursor:pointer;clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);transition:all .25s;margin-bottom:10px;box-shadow:0 0 28px var(--redg);}
+.btn-p:hover{transform:scale(1.03);box-shadow:0 0 45px var(--redg);}
+.btn-s{width:100%;max-width:280px;padding:12px;background:transparent;border:1px solid rgba(201,153,58,.5);color:var(--gold);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.3em;cursor:pointer;clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);transition:all .25s;margin-bottom:8px;}
+.btn-s:hover{background:rgba(201,153,58,.1);border-color:var(--gold);}
+.s-ver{position:absolute;bottom:12px;font-size:8px;color:var(--muted);letter-spacing:.3em;}
+
+/* ===================== MAP SCREEN ===================== */
+#mapscreen{background:var(--dark2);overflow:hidden;}
+.map-header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--dark);border-bottom:1px solid rgba(200,35,58,.25);flex-shrink:0;}
+.map-header-img{width:44px;height:44px;border-radius:50%;object-fit:cover;object-position:top;border:2px solid var(--red);box-shadow:0 0 12px var(--redg);flex-shrink:0;}
+.map-header-info h2{font-family:'Cinzel',serif;font-size:15px;color:var(--white);letter-spacing:.1em;}
+.map-header-info p{font-size:8px;color:var(--muted);letter-spacing:.2em;margin-top:2px;}
+.map-header-btns{margin-left:auto;display:flex;gap:8px;}
+.hdr-btn{background:transparent;border:1px solid rgba(255,255,255,.1);color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:8px;padding:5px 10px;cursor:pointer;letter-spacing:.15em;transition:all .2s;}
+.hdr-btn:hover,.hdr-btn.active{color:var(--gold);border-color:var(--gold);}
+.stat-strip{display:flex;background:rgba(0,0,0,.4);border-bottom:1px solid rgba(255,255,255,.04);flex-shrink:0;}
+.ss-item{flex:1;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;border-right:1px solid rgba(255,255,255,.04);}
+.ss-item:last-child{border-right:none;}
+.ss-val{font-family:'Cinzel',serif;font-size:13px;color:var(--gold);}
+.ss-lbl{font-size:7px;color:var(--muted);letter-spacing:.12em;}
+
+/* MAP GRID */
+.map-scroll{flex:1;overflow-y:auto;padding:14px;scrollbar-width:thin;scrollbar-color:var(--red) transparent;}
+.map-phase-label{font-size:8px;letter-spacing:.4em;color:var(--muted);text-transform:uppercase;margin:10px 0 8px;padding-left:4px;border-left:2px solid var(--red);padding-left:8px;}
+.map-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px;}
+.map-node{
+  position:relative;background:var(--dark);border:1px solid rgba(255,255,255,.06);
+  padding:10px 8px;cursor:pointer;transition:all .22s;display:flex;flex-direction:column;align-items:center;gap:5px;
+  border-top:2px solid;
+}
+.map-node.phase1{border-top-color:#2ab870;}
+.map-node.phase2{border-top-color:var(--blue2);}
+.map-node.phase3{border-top-color:var(--gold);}
+.map-node.phase4{border-top-color:var(--red2);}
+.map-node.phase5{border-top-color:var(--purple);}
+.map-node.locked{opacity:.35;cursor:not-allowed;filter:grayscale(.8);}
+.map-node.done{border-top-style:solid;}
+.map-node.done::after{content:'✓';position:absolute;top:4px;right:6px;font-size:9px;color:var(--green);}
+.map-node:not(.locked):hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.5);}
+.map-node-emoji{font-size:22px;}
+.map-node-lvl{font-size:7px;color:var(--muted);letter-spacing:.2em;}
+.map-node-name{font-family:'Cinzel',serif;font-size:9px;color:var(--white);text-align:center;line-height:1.3;}
+.map-node-loot{font-size:8px;color:var(--gold);}
+.map-lock-icon{position:absolute;bottom:6px;right:6px;font-size:10px;opacity:.4;}
+
+/* ===================== UPGRADE SCREEN ===================== */
+#upgradescreen{background:var(--dark2);}
+.upg-header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--dark);border-bottom:1px solid rgba(201,153,58,.25);flex-shrink:0;}
+.upg-header h2{font-family:'Cinzel',serif;font-size:16px;color:var(--gold);letter-spacing:.1em;}
+.upg-points{margin-left:auto;font-family:'Cinzel',serif;font-size:14px;color:var(--gold2);background:rgba(201,153,58,.1);border:1px solid rgba(201,153,58,.3);padding:4px 12px;letter-spacing:.1em;}
+.upg-scroll{flex:1;overflow-y:auto;padding:14px;scrollbar-width:thin;scrollbar-color:var(--gold) transparent;}
+.upg-char-card{display:flex;gap:14px;align-items:center;background:var(--dark);border:1px solid rgba(201,153,58,.15);padding:14px;margin-bottom:16px;}
+.upg-char-img{width:64px;height:64px;border-radius:6px;object-fit:cover;object-position:top;border:2px solid var(--gold);flex-shrink:0;}
+.upg-char-info h3{font-family:'Cinzel',serif;font-size:16px;color:var(--white);}
+.upg-char-info p{font-size:10px;color:var(--muted);line-height:1.6;margin-top:4px;font-family:'Crimson Pro',serif;font-style:italic;}
+.upg-section-title{font-size:8px;letter-spacing:.4em;color:var(--muted);text-transform:uppercase;margin-bottom:10px;border-left:2px solid var(--gold);padding-left:8px;}
+.upg-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px;}
+.upg-card{background:var(--dark);border:1px solid rgba(255,255,255,.06);padding:12px;display:flex;flex-direction:column;gap:6px;position:relative;transition:all .2s;}
+.upg-card.maxed{border-color:rgba(201,153,58,.3);}
+.upg-card-icon{font-size:24px;}
+.upg-card-name{font-family:'Cinzel',serif;font-size:11px;color:var(--white);letter-spacing:.05em;}
+.upg-card-desc{font-size:9px;color:var(--muted);line-height:1.5;}
+.upg-card-level{display:flex;gap:3px;margin-top:2px;}
+.upg-pip{width:12px;height:4px;background:rgba(255,255,255,.08);}
+.upg-pip.filled{background:var(--gold);}
+.upg-card-btn{background:rgba(201,153,58,.08);border:1px solid rgba(201,153,58,.3);color:var(--gold);font-family:'Share Tech Mono',monospace;font-size:9px;padding:6px;cursor:pointer;letter-spacing:.15em;transition:all .2s;margin-top:4px;}
+.upg-card-btn:hover{background:rgba(201,153,58,.2);}
+.upg-card-btn:disabled{opacity:.35;cursor:not-allowed;}
+.upg-card-btn.maxed-btn{color:var(--green);border-color:var(--green);background:rgba(42,184,112,.08);}
+
+/* ===================== HUD ===================== */
+.hud{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:rgba(0,0,0,.88);border-bottom:1px solid rgba(200,35,58,.3);gap:8px;flex-wrap:nowrap;z-index:10;backdrop-filter:blur(10px);flex-shrink:0;}
+.hud-bars{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0;}
+.hud-bar-row{display:flex;align-items:center;gap:6px;}
+.hud-bar-label{font-size:7px;color:var(--muted);letter-spacing:.15em;min-width:26px;}
+.hud-bar{flex:1;height:5px;background:#1a1a2a;overflow:hidden;}
+.hud-bar-fill{height:100%;transition:width .4s ease;}
+.hud-bar-fill.hp{background:linear-gradient(90deg,#c82338,#ff5060);}
+.hud-bar-fill.st{background:linear-gradient(90deg,var(--blue),#60a0ff);}
+.hud-bar-fill.sus{background:linear-gradient(90deg,#c87000,#ffaa00);}
+.hud-char{display:flex;flex-direction:column;align-items:center;}
+.hud-char-img{width:38px;height:38px;border-radius:50%;object-fit:cover;object-position:top;border:2px solid var(--red);box-shadow:0 0 10px var(--redg);}
+.hud-char-name{font-family:'Cinzel',serif;font-size:7px;color:var(--red2);letter-spacing:.15em;margin-top:2px;}
+.hud-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+.alert-pill{font-size:8px;padding:3px 10px;letter-spacing:.15em;border:1px solid;font-weight:700;}
+.alert-pill.safe{color:var(--green);border-color:var(--green);}
+.alert-pill.caution{color:#ffaa00;border-color:#ffaa00;}
+.alert-pill.danger{color:var(--red2);border-color:var(--red2);animation:blink .7s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.hud-abort{background:transparent;border:1px solid rgba(255,255,255,.1);color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:8px;padding:4px 8px;cursor:pointer;letter-spacing:.15em;}
+.hud-abort:hover{color:var(--red2);border-color:var(--red2);}
+
+/* ===================== GAME ===================== */
+#game{background:var(--dark);}
+.scene-area{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column;}
+.scene-visual{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;pointer-events:none;}
+.scene-emoji{font-size:clamp(80px,25vw,140px);opacity:.05;user-select:none;}
+.scene-gradient{position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.98) 0%,rgba(0,0,0,.7) 40%,rgba(0,0,0,.2) 100%);}
+.scene-char{position:absolute;bottom:190px;right:-8px;width:min(150px,34vw);opacity:.8;filter:drop-shadow(-8px 0 18px rgba(200,35,58,.4));pointer-events:none;z-index:1;transition:opacity .5s;}
+.scene-loc{position:absolute;top:12px;left:0;right:0;text-align:center;font-size:9px;letter-spacing:.4em;color:rgba(201,153,58,.5);text-transform:uppercase;pointer-events:none;}
+.scene-phase{position:absolute;top:28px;left:0;right:0;text-align:center;font-size:8px;letter-spacing:.3em;color:rgba(255,255,255,.15);pointer-events:none;}
+
+/* NARRATIVE */
+.narrative-area{position:relative;z-index:5;background:linear-gradient(0deg,rgba(5,5,12,1) 0%,rgba(5,5,12,.97) 80%,transparent 100%);padding:14px 14px 10px;margin-top:auto;}
+.narrative-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.narrative-char-img{width:30px;height:30px;border-radius:50%;object-fit:cover;object-position:top;border:1px solid var(--red);flex-shrink:0;}
+.narrative-speaker{font-family:'Cinzel',serif;font-size:10px;color:var(--red2);letter-spacing:.2em;}
+.narrative-text{font-family:'Crimson Pro',serif;font-size:14px;line-height:1.75;color:var(--text);margin-bottom:12px;min-height:56px;}
+.choices{display:flex;flex-direction:column;gap:6px;}
+.choice-btn{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);padding:9px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:all .2s;text-align:left;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text);letter-spacing:.04em;position:relative;overflow:hidden;}
+.choice-btn::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--red);transform:scaleY(0);transition:transform .2s;}
+.choice-btn:hover{background:rgba(200,35,58,.08);border-color:rgba(200,35,58,.4);color:var(--white);}
+.choice-btn:hover::before{transform:scaleY(1);}
+.choice-icon{font-size:15px;flex-shrink:0;}
+.choice-text{flex:1;}
+.choice-tag{font-size:7px;letter-spacing:.12em;padding:2px 5px;border:1px solid;white-space:nowrap;flex-shrink:0;}
+.choice-tag.g{color:var(--green);border-color:var(--green);}
+.choice-tag.b{color:var(--red2);border-color:var(--red2);}
+.choice-tag.n{color:var(--gold);border-color:var(--gold);}
+
+/* INV STRIP */
+.inv-strip{display:flex;gap:0;background:var(--dark2);border-top:1px solid rgba(255,255,255,.04);overflow-x:auto;scrollbar-width:none;flex-shrink:0;}
+.inv-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 10px;border-right:1px solid rgba(255,255,255,.04);min-width:52px;flex-shrink:0;}
+.inv-item-icon{font-size:16px;}
+.inv-item-name{font-size:7px;color:var(--muted);letter-spacing:.04em;text-align:center;}
+
+/* ===================== COMBAT ===================== */
+.combat-modal{position:absolute;inset:0;background:rgba(0,0,0,.93);z-index:20;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;}
+.combat-modal.active{display:flex;}
+.combat-alert{font-family:'Cinzel',serif;font-size:20px;color:var(--red2);letter-spacing:.15em;text-shadow:0 0 28px var(--redg);animation:blink .7s infinite;}
+.combat-enemy{font-size:60px;animation:eshake .25s infinite;}
+@keyframes eshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.combat-vs{display:flex;align-items:center;gap:18px;padding:8px 0;}
+.combat-vs-char{width:54px;height:54px;border-radius:50%;object-fit:cover;object-position:top;border:2px solid var(--red);}
+.combat-vs-txt{font-family:'Cinzel',serif;font-size:16px;color:var(--red2);}
+.combat-msg{font-family:'Crimson Pro',serif;font-size:14px;color:var(--text);text-align:center;line-height:1.7;max-width:320px;min-height:46px;}
+.combat-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:340px;}
+.ca{background:transparent;border:1px solid;padding:11px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .2s;font-family:'Share Tech Mono',monospace;}
+.ca span:first-child{font-size:22px;}
+.ca span:last-child{font-size:9px;letter-spacing:.2em;}
+.ca.shoot{color:var(--red2);border-color:rgba(200,35,58,.5);}
+.ca.shoot:hover{background:rgba(200,35,58,.15);border-color:var(--red2);}
+.ca.evade{color:var(--blue2);border-color:rgba(37,99,200,.5);}
+.ca.evade:hover{background:rgba(37,99,200,.15);border-color:var(--blue2);}
+.ca.disarm{color:var(--gold2);border-color:rgba(201,153,58,.5);}
+.ca.disarm:hover{background:rgba(201,153,58,.15);border-color:var(--gold2);}
+.ca.flee{color:var(--green);border-color:rgba(42,184,112,.5);}
+.ca.flee:hover{background:rgba(42,184,112,.15);border-color:var(--green);}
+
+/* ===================== OUTCOME ===================== */
+#outcome{align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 100%,rgba(200,35,58,.15) 0%,var(--dark) 60%);padding:24px;gap:12px;text-align:center;}
+.outcome-char{width:min(190px,48vw);filter:drop-shadow(0 0 36px rgba(200,35,58,.5));animation:charFloat 3s ease-in-out infinite;}
+.outcome-title{font-family:'Cinzel',serif;font-size:clamp(24px,7vw,38px);letter-spacing:.1em;font-weight:900;}
+.outcome-title.win{color:var(--gold2);text-shadow:0 0 28px rgba(240,192,96,.5);}
+.outcome-title.lose{color:var(--red2);text-shadow:0 0 28px var(--redg);}
+.outcome-quote{font-family:'Crimson Pro',serif;font-style:italic;font-size:13px;color:var(--muted);max-width:300px;line-height:1.7;}
+.outcome-stats{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;}
+.os{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.os-val{font-family:'Cinzel',serif;font-size:24px;color:var(--gold);}
+.os-lbl{font-size:8px;color:var(--muted);letter-spacing:.18em;}
+.outcome-div{width:100%;max-width:280px;height:1px;background:linear-gradient(90deg,transparent,rgba(201,153,58,.4),transparent);}
+
+/* TOAST */
+#toast{position:fixed;top:62px;left:50%;transform:translateX(-50%) translateY(-10px);background:rgba(5,5,15,.95);border:1px solid var(--gold);color:var(--gold);padding:6px 16px;font-size:10px;letter-spacing:.2em;opacity:0;transition:all .3s;z-index:200;pointer-events:none;white-space:nowrap;backdrop-filter:blur(10px);}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* MUSIC TOGGLE */
+#music-btn{position:fixed;bottom:16px;right:16px;z-index:150;background:rgba(0,0,0,0.8);border:1px solid rgba(201,153,58,0.4);color:var(--gold);font-size:16px;width:38px;height:38px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px);transition:all .2s;}
+#music-btn:hover{border-color:var(--gold);background:rgba(201,153,58,0.1);}
+
+/* ===================== CUTSCENE ===================== */
+#cutscene{
+  position:fixed;inset:0;z-index:400;
+  background:#000;
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:30px 24px;
+}
+#cutscene.active{display:flex;}
+.cut-phase{font-size:8px;letter-spacing:.5em;color:var(--muted);margin-bottom:16px;text-transform:uppercase;}
+.cut-title{font-family:'Cinzel',serif;font-size:clamp(22px,6vw,36px);font-weight:900;color:var(--gold);letter-spacing:.12em;text-align:center;margin-bottom:10px;opacity:0;animation:cutFadeIn 1s .3s forwards;}
+.cut-loc{font-size:9px;letter-spacing:.35em;color:var(--red2);margin-bottom:24px;opacity:0;animation:cutFadeIn 1s .6s forwards;}
+.cut-char{width:min(200px,48vw);filter:drop-shadow(0 0 40px rgba(200,35,58,.6));opacity:0;animation:cutFadeIn 1s .2s forwards, charFloat 4s 1.2s ease-in-out infinite;}
+.cut-divider{width:60px;height:1px;background:var(--gold);margin:16px auto;opacity:0;animation:cutFadeIn .8s .8s forwards;}
+.cut-story{font-family:'Crimson Pro',serif;font-style:italic;font-size:15px;color:var(--text);line-height:1.8;text-align:center;max-width:340px;opacity:0;animation:cutFadeIn 1s 1s forwards;}
+.cut-skip{position:absolute;bottom:24px;right:24px;background:transparent;border:1px solid rgba(255,255,255,.15);color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:9px;padding:6px 14px;cursor:pointer;letter-spacing:.2em;}
+.cut-skip:hover{color:var(--white);border-color:rgba(255,255,255,.4);}
+.cut-tap{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted);letter-spacing:.3em;animation:blink 1.5s infinite;}
+@keyframes cutFadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===================== STAT POPUP ===================== */
+.stat-popup{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.8);
+  background:rgba(5,5,15,.97);border:1px solid var(--gold);
+  padding:20px 28px;z-index:250;text-align:center;
+  opacity:0;pointer-events:none;transition:all .3s;
+  font-family:'Cinzel',serif;
+}
+.stat-popup.show{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:all;}
+.stat-popup-val{font-size:36px;color:var(--gold2);margin-bottom:4px;}
+.stat-popup-lbl{font-size:9px;color:var(--muted);letter-spacing:.25em;}
+
+/* SCREEN FLASH */
+.flash-overlay{position:fixed;inset:0;z-index:350;pointer-events:none;opacity:0;transition:opacity .1s;}
+.flash-overlay.red{background:rgba(200,35,58,.35);}
+.flash-overlay.gold{background:rgba(201,153,58,.25);}
+.flash-overlay.show{opacity:1;}
+
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<button id="music-btn" onclick="toggleMusic()" title="Toggle Music">🎵</button>
+<div class="flash-overlay" id="flash"></div>
+
+<!-- ========== CUTSCENE ========== -->
+<div id="cutscene">
+  <div class="cut-phase" id="cut-phase">PHASE I</div>
+  <img class="cut-char" src="/mnt/user-data/uploads/62CF68EE-2B37-44DA-BA86-63DF492FEA80.png" alt="Jackal" onerror="this.outerHTML='<div style=\'font-size:80px\'>🎭</div>'">
+  <div class="cut-divider"></div>
+  <div class="cut-title" id="cut-title">MISSION NAME</div>
+  <div class="cut-loc" id="cut-loc">LOCATION</div>
+  <div class="cut-story" id="cut-story">Story text...</div>
+  <button class="cut-skip" onclick="skipCutscene()">SKIP ▶</button>
+  <div class="cut-tap">TAP ANYWHERE TO CONTINUE</div>
+</div>
+
+<!-- ========== SPLASH ========== -->
+<div class="screen active" id="splash">
+  <div class="s-spotlight"></div>
+  <img class="s-char" id="jackal-img" src="/mnt/user-data/uploads/62CF68EE-2B37-44DA-BA86-63DF492FEA80.png" alt="Jackal" onerror="this.style.display='none'">
+  <div class="s-content">
+    <div class="s-eye">GENTLEMAN THIEF · ORIGINAL SERIES</div>
+    <div class="s-title">JACKAL</div>
+    <div class="s-sub">15 Heists. Zero Witnesses.</div>
+    <div class="s-div"><span>✦</span></div>
+    <button class="btn-p" onclick="SFX.play('click');showScreen('mapscreen')">BEGIN OPERATION</button>
+    <button class="btn-s" onclick="SFX.play('click');showScreen('upgradescreen')">🎯 UPGRADE JACKAL</button>
+    <button class="btn-s" onclick="SFX.play('click');showLeaderboard()">🏆 CRIMINAL RECORDS</button>
+    <button class="btn-s" onclick="SFX.play('click');showScreen('howtoplay')">📖 HOW TO PLAY</button>
+  </div>
+  <button class="btn-s" style="max-width:280px;margin-bottom:8px;" onclick="SFX.play('click');showScreen('credits')">🎬 CREDITS</button>
+  <div class="s-ver">FULL BUILD v3.0 — 15 LEVELS · SOUND · SAVES · CUTSCENES</div>
+</div>
+
+<!-- ========== HOW TO PLAY ========== -->
+<div class="screen" id="howtoplay" style="background:var(--dark2);overflow-y:auto;">
+  <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--dark);border-bottom:1px solid rgba(201,153,58,.25);flex-shrink:0;">
+    <div style="font-family:'Cinzel',serif;font-size:16px;color:var(--gold);letter-spacing:.1em;">📖 HOW TO PLAY</div>
+    <button class="hdr-btn" style="margin-left:auto;" onclick="SFX.play('click');showScreen('splash')">← BACK</button>
+  </div>
+  <div style="padding:20px 18px;max-width:480px;margin:0 auto;overflow-y:auto;">
+    <img src="/mnt/user-data/uploads/62CF68EE-2B37-44DA-BA86-63DF492FEA80.png" style="width:80px;height:80px;object-fit:cover;object-position:top;border-radius:50%;border:2px solid var(--gold);display:block;margin:0 auto 16px;" onerror="this.style.display='none'">
+    <div style="font-family:'Cinzel',serif;font-size:18px;color:var(--white);text-align:center;margin-bottom:4px;">YOU ARE JACKAL</div>
+    <div style="font-family:'Crimson Pro',serif;font-style:italic;font-size:13px;color:var(--muted);text-align:center;margin-bottom:24px;line-height:1.7;">The world's greatest gentleman thief. You never harm, you never fail, and you are never caught — until now it's up to you.</div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="background:var(--dark);border:1px solid rgba(255,255,255,.06);border-left:3px solid var(--blue2);padding:14px;">
+        <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--blue2);letter-spacing:.15em;margin-bottom:8px;">🤫 STEALTH</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.7;">Your most important stat. Keep it high by making smart, careful choices. The higher your stealth, the better your chances in combat and the better your style rank at the end.</div>
+      </div>
+      <div style="background:var(--dark);border:1px solid rgba(255,255,255,.06);border-left:3px solid var(--gold);padding:14px;">
+        <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--gold);letter-spacing:.15em;margin-bottom:8px;">⚠ SUSPICION</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.7;">Keep this LOW. Above 65% guards will randomly patrol and catch you. Above 80% you're in serious danger. Ghost exits require suspicion below 20%.</div>
+      </div>
+      <div style="background:var(--dark);border:1px solid rgba(255,255,255,.06);border-left:3px solid var(--red2);padding:14px;">
+        <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--red2);letter-spacing:.15em;margin-bottom:8px;">⚔ COMBAT</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.7;"><b style="color:var(--white)">SHOOT</b> — High chance, raises suspicion a lot.<br><b style="color:var(--white)">DISARM</b> — Medium chance, keeps things quiet. Jackal's preferred method.<br><b style="color:var(--white)">EVADE</b> — Depends on your stealth stat.<br><b style="color:var(--white)">FLEE</b> — Usually works but costs stealth.</div>
+      </div>
+      <div style="background:var(--dark);border:1px solid rgba(255,255,255,.06);border-left:3px solid var(--green);padding:14px;">
+        <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--green);letter-spacing:.15em;margin-bottom:8px;">🏆 STYLE RANKS</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.7;"><b style="color:var(--gold)">S+</b> — Ghost exit. Stealth &gt;80%, Suspicion &lt;12%<br><b style="color:var(--gold)">S</b> — Near perfect. Stealth &gt;65%, Suspicion &lt;25%<br><b style="color:var(--white)">A</b> — Clean run. Stealth &gt;50%<br><b style="color:var(--white)">B/C</b> — Sloppy but successful<br><b style="color:var(--red2)">F</b> — Mission failed</div>
+      </div>
+      <div style="background:var(--dark);border:1px solid rgba(255,255,255,.06);border-left:3px solid var(--purple);padding:14px;">
+        <div style="font-family:'Cinzel',serif;font-size:11px;color:#a78bfa;letter-spacing:.15em;margin-bottom:8px;">⬆ UPGRADES</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.7;">Earn upgrade points by completing missions. Spend them on Stealth, Combat and Gadget skills. Higher upgrades make later missions survivable — invest wisely before attempting Phase IV and V.</div>
+      </div>
+      <div style="background:var(--dark);border:1px solid rgba(255,255,255,.06);border-left:3px solid var(--gold);padding:14px;">
+        <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--gold);letter-spacing:.15em;margin-bottom:8px;">💡 PRO TIPS</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.7;">• Patient choices (+STEALTH tags) beat risky ones long-term<br>• Always upgrade before tackling a new Phase<br>• Ghost exits earn 5,000 bonus score points<br>• Save often — use the 💾 button on the map<br>• Disarm is always better than shooting — Jackal is a gentleman</div>
+      </div>
+    </div>
+    <button class="btn-p" style="margin-top:24px;max-width:100%;" onclick="SFX.play('click');showScreen('splash')">LET'S PLAY →</button>
+  </div>
+</div>
+
+<!-- ========== MAP SCREEN ========== -->
+<div class="screen" id="mapscreen">
+  <div class="map-header">
+    <img class="map-header-img" src="/mnt/user-data/uploads/62CF68EE-2B37-44DA-BA86-63DF492FEA80.png" alt="J" onerror="this.outerHTML='<div style=\'width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:28px;border:2px solid #c8233a;border-radius:50%\'>🎭</div>'">
+    <div class="map-header-info">
+      <h2>JACKAL — OPERATION MAP</h2>
+      <p>SELECT A MISSION · 15 HEISTS AWAIT</p>
+    </div>
+    <div class="map-header-btns">
+      <button class="hdr-btn" onclick="showScreen('upgradescreen')">⬆ UPGRADES</button>
+      <button class="hdr-btn" onclick="SFX.play('click');showScreen('howtoplay')">📖 GUIDE</button>
+      <button class="hdr-btn" onclick="SFX.play('click');showScreen('splash')">← BACK</button>
+    </div>
+  </div>
+  <div class="stat-strip">
+    <div class="ss-item"><span class="ss-val" id="m-rep">0</span><span class="ss-lbl">REP</span></div>
+    <div class="ss-item"><span class="ss-val" id="m-loot">$0</span><span class="ss-lbl">LOOT</span></div>
+    <div class="ss-item"><span class="ss-val" id="m-wins">0/15</span><span class="ss-lbl">HEISTS</span></div>
+    <div class="ss-item"><span class="ss-val" id="m-pts">0</span><span class="ss-lbl">UPG PTS</span></div>
+  </div>
+  <div style="padding:6px 16px;background:var(--dark);border-bottom:1px solid rgba(255,255,255,.04);display:flex;align-items:center;gap:10px;flex-shrink:0;">
+    <div style="font-size:8px;color:var(--muted);letter-spacing:.2em;white-space:nowrap;">PROGRESS</div>
+    <div style="flex:1;height:4px;background:#1a1a2a;overflow:hidden;">
+      <div id="progress-bar" style="height:100%;background:linear-gradient(90deg,var(--red),var(--gold));width:0%;transition:width .6s ease;"></div>
+    </div>
+    <div style="font-size:8px;color:var(--gold);letter-spacing:.15em;" id="progress-pct">0%</div>
+  </div>
+  <div class="map-scroll" id="map-scroll"></div>
+</div>
+
+<!-- ========== UPGRADE SCREEN ========== -->
+<div class="screen" id="upgradescreen">
+  <div class="upg-header">
+    <h2>⬆ JACKAL UPGRADES</h2>
+    <div class="upg-points">🎯 <span id="upg-pts-display">0</span> PTS</div>
+    <button class="hdr-btn" style="margin-left:10px;" onclick="SFX.play('click');showScreen('mapscreen')">← MAP</button>
+  </div>
+  <div class="upg-scroll">
+    <div class="upg-char-card">
+      <img class="upg-char-img" src="/mnt/user-data/uploads/62CF68EE-2B37-44DA-BA86-63DF492FEA80.png" alt="Jackal" onerror="this.outerHTML='<span style=\'font-size:48px\'>🎭</span>'">
+      <div class="upg-char-info">
+        <h3>JACKAL</h3>
+        <p>A gentleman never hurts — but he never gets caught either. Spend upgrade points earned from completed heists to sharpen your edge.</p>
+      </div>
+    </div>
+    <div class="upg-section-title">STEALTH SKILLS</div>
+    <div class="upg-grid" id="upg-stealth-grid"></div>
+    <div class="upg-section-title">COMBAT SKILLS</div>
+    <div class="upg-grid" id="upg-combat-grid"></div>
+    <div class="upg-section-title">GADGETS & TECH</div>
+    <div class="upg-grid" id="upg-gadget-grid"></div>
+  </div>
+</div>
+
+<!-- ========== GAME SCREEN ========== -->
+<div class="screen" id="game">
+  <div class="hud">
+    <div class="hud-bars">
+      <div class="hud-bar-row"><div class="hud-bar-label">HP</div><div class="hud-bar"><div class="hud-bar-fill hp" id="bar-hp" style="width:100%"></div></div></div>
+      <div class="hud-bar-row"><div class="hud-bar-label">STL</div><div class="hud-bar"><div class="hud-bar-fill st" id="bar-st" style="width:100%"></div></div></div>
+      <div class="hud-bar-row"><div class="hud-bar-label">SUS</div><div class="hud-bar"><div class="hud-bar-fill sus" id="bar-sus" style="width:0%"></div></div></div>
+    </div>
+    <div class="hud-char">
+      <img class="hud-char-img" src="/mnt/user-data/uploads/62CF68EE-2B37-44DA-BA86-63DF492FEA80.png" alt="J" onerror="this.style.display='none'">
+      <div class="hud-char-name">JACKAL</div>
+    </div>
+    <div class="hud-right">
+      <span class="alert-pill safe" id="alert">● SAFE</span>
+      <button class="hud-abort" onclick="SFX.play('click');if(confirm('Abort this mission? Progress will be lost.')){SFX.stopMusic();showScreen('mapscreen');}">✕ ABORT</button>
+    </div>
+  </div>
+  <div class="scene-area">
+    <div class="scene-visual">
+      <div class="scene-emoji" id="scene-emoji">🏛️</div>
+      <div class="scene-gradient"></div>
+    </div>
+    <img class="scene-char" src="/mnt/user-data/uploads/62CF68EE-2B37-44DA-BA86-63DF492FEA80.png" alt="" onerror="this.style.display='none'">
+    <div class="scene-loc" id="scene-loc">—</div>
+    <div class="scene-phase" id="scene-phase">—</div>
+
+    <div class="combat-modal" id="combat-modal">
+      <div class="combat-alert">⚠ GUARD DETECTED</div>
+      <div class="combat-enemy" id="combat-enemy">💂</div>
+      <div class="combat-vs">
+        <img class="combat-vs-char" src="/mnt/user-data/uploads/62CF68EE-2B37-44DA-BA86-63DF492FEA80.png" alt="J" onerror="this.outerHTML='<span style=\'font-size:40px\'>🎭</span>'">
+        <div class="combat-vs-txt">VS</div>
+        <span style="font-size:40px" id="combat-enemy2">💂</span>
+      </div>
+      <div class="combat-msg" id="combat-msg">A guard has spotted Jackal.</div>
+      <div class="combat-actions">
+        <button class="ca shoot" onclick="fight('shoot')"><span>🔫</span><span>SHOOT</span></button>
+        <button class="ca evade" onclick="fight('evade')"><span>🏃</span><span>EVADE</span></button>
+        <button class="ca disarm" onclick="fight('disarm')"><span>🥋</span><span>DISARM</span></button>
+        <button class="ca flee" onclick="fight('flee')"><span>💨</span><span>FLEE</span></button>
+      </div>
+    </div>
+
+    <div class="narrative-area">
+      <div class="narrative-header">
+        <img class="narrative-char-img" src="/mnt/user-data/uploads/62CF68EE-2B37-44DA-BA86-63DF492FEA80.png" alt="" onerror="this.outerHTML='<span style=\'font-size:18px\'>🎭</span>'">
+        <div class="narrative-speaker" id="n-speaker">JACKAL</div>
+      </div>
+      <div class="narrative-text" id="n-text">Loading...</div>
+      <div class="choices" id="choices"></div>
+    </div>
+  </div>
+  <div class="inv-strip">
+    <div class="inv-item"><div class="inv-item-icon">🔦</div><div class="inv-item-name">TORCH</div></div>
+    <div class="inv-item"><div class="inv-item-icon">🔑</div><div class="inv-item-name">PICKS</div></div>
+    <div class="inv-item"><div class="inv-item-icon">🔫</div><div class="inv-item-name">PISTOL</div></div>
+    <div class="inv-item"><div class="inv-item-icon">💊</div><div class="inv-item-name">MED KIT</div></div>
+    <div class="inv-item"><div class="inv-item-icon">📡</div><div class="inv-item-name">SCANNER</div></div>
+    <div class="inv-item"><div class="inv-item-icon">💣</div><div class="inv-item-name">CHARGES</div></div>
+    <div class="inv-item"><div class="inv-item-icon">🕶️</div><div class="inv-item-name">GOGGLES</div></div>
+    <div class="inv-item"><div class="inv-item-icon">🧲</div><div class="inv-item-name">JAMMER</div></div>
+  </div>
+</div>
+
+<!-- ========== CREDITS ========== -->
+<div class="screen" id="credits" style="background:var(--dark);align-items:center;justify-content:center;text-align:center;padding:30px 24px;gap:16px;">
+  <div style="font-size:60px;animation:charFloat 3s ease-in-out infinite;">🎭</div>
+  <div style="font-family:'Cinzel',serif;font-size:28px;color:var(--gold);letter-spacing:.15em;text-shadow:0 0 30px rgba(201,153,58,.5);">JACKAL</div>
+  <div style="font-family:'Crimson Pro',serif;font-style:italic;font-size:13px;color:var(--muted);max-width:300px;line-height:1.8;">"A gentleman steals with wit, escapes with grace, and leaves no trace — except the legend."</div>
+  <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);"></div>
+  <div style="display:flex;flex-direction:column;gap:8px;font-size:10px;color:var(--muted);letter-spacing:.2em;">
+    <div><span style="color:var(--gold)">GAME CONCEPT</span><br>Original Novel Adaptation</div>
+    <div style="margin-top:4px;"><span style="color:var(--gold)">CHARACTER DESIGN</span><br>Original Artwork</div>
+    <div style="margin-top:4px;"><span style="color:var(--gold)">GAME BUILD</span><br>HTML · CSS · JAVASCRIPT</div>
+    <div style="margin-top:4px;"><span style="color:var(--gold)">VERSION</span><br>v3.0 — FINAL BUILD</div>
+    <div style="margin-top:4px;font-size:9px;color:#3a3a4a;">15 MISSIONS · SOUND ENGINE · SAVE SYSTEM<br>LEADERBOARD · UPGRADES · CUTSCENES</div>
+  </div>
+  <button class="btn-p" style="max-width:240px;margin-top:8px;" onclick="SFX.play('click');showScreen('splash')">← BACK TO GAME</button>
+</div>
+
+<!-- ========== OUTCOME ========== -->
+<div class="screen" id="outcome">
+  <img class="outcome-char" src="/mnt/user-data/uploads/62CF68EE-2B37-44DA-BA86-63DF492FEA80.png" alt="Jackal" onerror="this.outerHTML='<span style=\'font-size:80px\'>🎭</span>'">
+  <div class="outcome-title" id="o-title">HEIST COMPLETE</div>
+  <div class="outcome-quote" id="o-quote">"Another city, another score."</div>
+  <div class="outcome-div"></div>
+  <div class="outcome-stats">
+    <div class="os"><div class="os-val" id="o-loot">$0</div><div class="os-lbl">LOOT</div></div>
+    <div class="os"><div class="os-val" id="o-rep">+0</div><div class="os-lbl">REPUTATION</div></div>
+    <div class="os"><div class="os-val" id="o-pts">+0</div><div class="os-lbl">UPG POINTS</div></div>
+    <div class="os"><div class="os-val" id="o-rank">S</div><div class="os-lbl">STYLE RANK</div></div>
+    <div class="os"><div class="os-val" id="o-score">0</div><div class="os-lbl">SCORE</div></div>
+  </div>
+  <button class="btn-p" id="o-btn" style="max-width:260px" onclick="showScreen('mapscreen')">NEXT MISSION</button>
+  <button class="btn-s" style="max-width:260px" onclick="SFX.play('click');showScreen('mapscreen')">MISSION MAP</button>
+</div>
+
+<script>
+// ============================================================
+//  GAME STATE
+// ============================================================
+const G = {
+  hp:100, stealth:100, suspicion:0,
+  rep:0, totalLoot:0, wins:0, ghosts:0, upgPts:0,
+  done:[], current:0, step:0,
+  runLoot:0, runRep:0, fightCb:null,
+  upgrades:{
+    shadow:0, disguise:0, lockpick:0, timing:0,
+    accuracy:0, disarmSkill:0, evasion:0, resilience:0,
+    jammer:0, hacker:0, smokeKit:0, scanner:0
+  }
+};
+
+// ============================================================
+//  UPGRADES DATA
+// ============================================================
+const UPGRADES = {
+  stealth:[
+    {key:'shadow',    icon:'👤', name:'Shadow Walk',      desc:'Move silently. Each level reduces suspicion gained by 15%.', maxLv:3, cost:2},
+    {key:'disguise',  icon:'🎭', name:'Master Disguise',  desc:'Better covers. Bluff choices succeed 20% more per level.', maxLv:3, cost:2},
+    {key:'lockpick',  icon:'🔑', name:'Lockmaster',       desc:'Vault and door choices gain +10 stealth per level.', maxLv:3, cost:2},
+    {key:'timing',    icon:'⏱️', name:'Perfect Timing',   desc:'Camera and patrol timing attempts always succeed at Lv 3.', maxLv:3, cost:2}
+  ],
+  combat:[
+    {key:'accuracy',    icon:'🎯', name:'Marksman',        desc:'Shoot success rate +10% per level. Max 95%.', maxLv:3, cost:2},
+    {key:'disarmSkill', icon:'🥋', name:'Disarm Expert',   desc:'Disarm success rate +15% per level. Max 95%.', maxLv:3, cost:2},
+    {key:'evasion',     icon:'🏃', name:'Ghost Reflexes',  desc:'Evade success rate scales with level, not just stealth.', maxLv:3, cost:2},
+    {key:'resilience',  icon:'💪', name:'Resilience',      desc:'Reduce HP loss from combat by 5 per level.', maxLv:3, cost:2}
+  ],
+  gadget:[
+    {key:'jammer',   icon:'🧲', name:'Signal Jammer Pro', desc:'Jammer choices add +15 stealth & 0 suspicion per level.', maxLv:3, cost:3},
+    {key:'hacker',   icon:'💻', name:'Hacker Suite',      desc:'Hack choices have -10% suspicion cost per level.', maxLv:3, cost:3},
+    {key:'smokeKit', icon:'💨', name:'Smoke Arsenal',     desc:'Flee attempts never fail and cost -5 stealth per level.', maxLv:3, cost:3},
+    {key:'scanner',  icon:'📡', name:'Enhanced Scanner',  desc:'Reveals guard positions — suspicion random events reduced.', maxLv:3, cost:3}
+  ]
+};
+
+// ============================================================
+//  ALL 15 MISSIONS
+// ============================================================
+const MISSIONS = [
+  // ── PHASE 1: CITY TARGETS ────────────────────────────────
+  {
+    id:0,level:1,phase:'PHASE I — CITY TARGETS',phaseClass:'phase1',
+    name:'The Gallery Ghost',loc:'CITY ART GALLERY · DOWNTOWN',
+    desc:'A rare Monet arrived overnight. One drowsy guard, basic cameras. Your first test — make it look effortless.',
+    emoji:'🖼️',loot:120000,rep:8,pts:1,
+    tags:[{l:'STEALTH',c:'blue'},{l:'$120K',c:'gold'},{l:'EASY',c:'green'}],
+    steps:[
+      {sp:'JACKAL',txt:'The gallery closes in eight minutes. I\'m inside, blending with the last tourists. The Monet is in Room 4 — one camera, one guard named Peters who checks his phone every ninety seconds.',
+       ch:[{i:'🚶',t:'Stroll past Peters casually',ef:'st',ev:5,tl:'SAFE',tc:'g',nx:1},{i:'💡',t:'Cut east-wing power',ef:'sus',ev:12,tl:'RISKY',tc:'b',nx:2},{i:'🎭',t:'Stage a scene at the gift shop',ef:'st',ev:-5,tl:'CLEVER',tc:'g',nx:3}]},
+      {sp:'JACKAL',txt:'Peters doesn\'t look up. Room 4 — the Monet glows in low light. Camera sweeps every twelve seconds. I count the rhythm twice before moving.',
+       ch:[{i:'⏱️',t:'Time the camera\'s blind spot',ef:'st',ev:10,tl:'+STEALTH',tc:'g',nx:4},{i:'🧲',t:'Deploy the magnetic jammer',ef:'sus',ev:0,tl:'CLEAN',tc:'n',nx:4},{i:'💨',t:'Grab it fast and move',ef:'sus',ev:20,tl:'RECKLESS',tc:'b',nx:5}]},
+      {sp:'JACKAL',txt:'East wing dark. Peters is no longer dozing — boots on marble, moving with purpose. I need to be faster.',
+       ch:[{i:'🏃',t:'Rush directly to Room 4',ef:'sus',ev:15,tl:'TENSE',tc:'b',nx:4},{i:'🤫',t:'Hide in storage — wait him out',ef:'st',ev:5,tl:'+STEALTH',tc:'g',nx:4}]},
+      {sp:'JACKAL',txt:'Gift shop alarm draws Peters east. Two minutes — maybe three. I move into Room 4 like I own it.',
+       ch:[{i:'🎯',t:'Take the Monet, clean and precise',ef:'st',ev:10,tl:'+STEALTH',tc:'g',nx:4},{i:'💰',t:'Also lift the jewelled frame',ef:'loot',ev:20000,tl:'+$20K',tc:'n',nx:4}]},
+      {sp:'JACKAL',txt:'The Monet slides into my case with a soft click. Peters is looping back. Service door — twenty metres behind me.',
+       ch:[{i:'🚪',t:'Service door — clean ghost exit',ef:'none',ev:0,tl:'GHOST EXIT',tc:'g',nx:'win'},{i:'🏛️',t:'Walk out the front — bold',ef:'sus',ev:25,tl:'BOLD',tc:'b',nx:'win'}]},
+      {sp:'JACKAL',txt:'Moving fast was a mistake. Peters rounds the corner and we lock eyes. He sees the case. Hand moves to radio.',
+       ch:[{i:'⚡',t:'Neutralise him — non-lethal',ef:'combat',ev:0,tl:'ENGAGE',tc:'b',nx:4},{i:'🗣️',t:'Bluff — maintenance crew',ef:'sus',ev:20,tl:'50/50',tc:'b',nx:4}]}
+    ]
+  },
+  {
+    id:1,level:2,phase:'PHASE I — CITY TARGETS',phaseClass:'phase1',
+    name:'The Penthouse Score',loc:'GRAND MERIDIAN HOTEL · 42ND FLOOR',
+    desc:'A diamond merchant is hosting a private party. His travel safe sits in Suite 4201. You\'re already on the guest list.',
+    emoji:'🏨',loot:230000,rep:12,pts:1,
+    tags:[{l:'DISGUISE',c:'blue'},{l:'$230K',c:'gold'},{l:'EASY',c:'green'}],
+    steps:[
+      {sp:'JACKAL',txt:'The lobby is electric — champagne, silk ties, bad decisions. I\'m in a tailored tuxedo that cost more than Peters earns in a month. Suite 4201 is thirty-seven floors up and the merchant is currently telling someone about his yacht.',
+       ch:[{i:'🛗',t:'Take the private elevator — confident',ef:'st',ev:10,tl:'+STEALTH',tc:'g',nx:1},{i:'🍸',t:'Chat up the security chief first',ef:'sus',ev:5,tl:'INTEL',tc:'n',nx:2},{i:'🧑‍🍳',t:'Slip in with room service',ef:'sus',ev:5,tl:'DISGUISE',tc:'n',nx:3}]},
+      {sp:'JACKAL',txt:'The floor is quiet. Two guards at each end of the corridor. The safe is bolted behind a painting in the bedroom. Classic.',
+       ch:[{i:'👁️',t:'Watch the guard rotation — 4 minutes',ef:'st',ev:15,tl:'PATIENT',tc:'g',nx:4},{i:'🔑',t:'Bypass the door lock — 90 seconds',ef:'sus',ev:8,tl:'TECHNICAL',tc:'b',nx:4}]},
+      {sp:'JACKAL',txt:'The security chief — ex-military, sharp eyes, but flattered easily. He tells me the floor sweeps happen every six minutes. Useful.',
+       ch:[{i:'⏱️',t:'Use that intel — time the sweep',ef:'st',ev:20,tl:'+STEALTH',tc:'g',nx:4},{i:'🃏',t:'Keep chatting — create longer window',ef:'sus',ev:3,tl:'RISKY PLAY',tc:'b',nx:4}]},
+      {sp:'JACKAL',txt:'Room service cart is a masterclass. Inside the suite. The safe is behind a Modigliani print — combination lock, four digits.',
+       ch:[{i:'👂',t:'Listen to the tumblers',ef:'st',ev:12,tl:'+STEALTH',tc:'g',nx:4},{i:'📱',t:'Use the scanner app',ef:'sus',ev:5,tl:'TECH',tc:'n',nx:4}]},
+      {sp:'JACKAL',txt:'The case holds a 12-carat emerald cut diamond and bearer bonds worth triple that. I re-hang the Modigliani and wheel the cart back out.',
+       ch:[{i:'🚪',t:'Exit via the service stairs',ef:'none',ev:0,tl:'GHOST EXIT',tc:'g',nx:'win'},{i:'🎭',t:'Re-join the party briefly — alibi',ef:'sus',ev:10,tl:'BOLD',tc:'b',nx:'win'}]}
+    ]
+  },
+  {
+    id:2,level:3,phase:'PHASE I — CITY TARGETS',phaseClass:'phase1',
+    name:'The Diamond Affair',loc:'HARRINGTON AUCTION HOUSE · FINANCIAL DISTRICT',
+    desc:'The Harrington Blue Diamond goes to auction at dawn. Sub-level vault, four guards, laser grid, thirty-second alarm response. The kind of job that makes legends.',
+    emoji:'💎',loot:850000,rep:20,pts:2,
+    tags:[{l:'STEALTH',c:'blue'},{l:'$850K',c:'gold'},{l:'MEDIUM',c:'red'}],
+    steps:[
+      {sp:'JACKAL',txt:'Rooftop. The auction house hums below — late staff, catering crew, four guards rotating in pairs. The Blue Diamond is on Sub-Level 1. Four-hour window. Let\'s not waste it.',
+       ch:[{i:'🕳️',t:'HVAC shaft from the roof',ef:'st',ev:15,tl:'+STEALTH',tc:'g',nx:1},{i:'🧑‍🍳',t:'Pose as catering staff',ef:'sus',ev:5,tl:'MODERATE',tc:'b',nx:2},{i:'💻',t:'Hack the guard rotation terminal',ef:'st',ev:10,tl:'+STEALTH',tc:'g',nx:3}]},
+      {sp:'JACKAL',txt:'HVAC shaft — tight but manageable. Sub-Level 1 through the grate: two guards, a card game, vault door gleaming gold at the far end. Laser grid is live.',
+       ch:[{i:'🕶️',t:'Thermal goggles — map the grid',ef:'st',ev:10,tl:'PRECISE',tc:'g',nx:4},{i:'⏰',t:'Wait for shift change — 40 min',ef:'st',ev:20,tl:'PATIENT',tc:'g',nx:4},{i:'📡',t:'Remote-disable the laser grid',ef:'sus',ev:22,tl:'ALARM RISK',tc:'b',nx:5}]},
+      {sp:'JACKAL',txt:'Catering disguise. Coffee delivered to two guards — they barely look up. Staff elevator to Sub-Level 1. Twelve minutes before they count the uniforms.',
+       ch:[{i:'🛗',t:'Staff elevator — direct',ef:'none',ev:0,tl:'DIRECT',tc:'n',nx:4},{i:'🚶',t:'Maintenance stairs — slower, safer',ef:'st',ev:10,tl:'+STEALTH',tc:'g',nx:4}]},
+      {sp:'JACKAL',txt:'Guard rotation adjusted. Seven-minute gap. I\'m in the stairwell. But one guard broke rotation — he\'s near the vault.',
+       ch:[{i:'🤫',t:'Observe — wait for him to move',ef:'st',ev:5,tl:'PATIENT',tc:'g',nx:4},{i:'⚡',t:'Non-lethal takedown — silent',ef:'combat',ev:0,tl:'ENGAGE',tc:'b',nx:4}]},
+      {sp:'JACKAL',txt:'The vault. The Harrington Blue sits in its case — cold, brilliant, worth more than most men see in three lifetimes. Six-digit combination.',
+       ch:[{i:'🧠',t:'Cross-reference the blueprints',ef:'st',ev:0,tl:'METHODICAL',tc:'g',nx:5},{i:'👂',t:'Safecrack by ear — old school',ef:'st',ev:10,tl:'+STEALTH',tc:'g',nx:5},{i:'💣',t:'Micro-charge on the hinges',ef:'sus',ev:40,tl:'LAST RESORT',tc:'b',nx:5}]},
+      {sp:'JACKAL',txt:'Vault opens with a ceremonial click. I wrap the Blue in silk. Guards are due in five minutes.',
+       ch:[{i:'🕳️',t:'Back through the HVAC shaft',ef:'none',ev:0,tl:'GHOST EXIT',tc:'g',nx:'win'},{i:'🚗',t:'Loading dock — driver waiting',ef:'sus',ev:10,tl:'FAST EXIT',tc:'b',nx:'win'}]},
+      {sp:'JACKAL',txt:'A laser I didn\'t map. Alarm tears through Sub-Level 1. Four guards. Boots on concrete — getting louder.',
+       ch:[{i:'⚡',t:'Fight through — controlled chaos',ef:'combat',ev:0,tl:'COMBAT',tc:'b',nx:4},{i:'💨',t:'Smoke cover and sprint',ef:'sus',ev:30,tl:'DESPERATE',tc:'b',nx:4}]}
+    ]
+  },
+  // ── PHASE 2: CORPORATE ───────────────────────────────────
+  {
+    id:3,level:4,phase:'PHASE II — CORPORATE HEISTS',phaseClass:'phase2',
+    name:'The Tech Vault',loc:'AXIOM TECHNOLOGIES HQ · SILICON TOWER',
+    desc:'A prototype quantum chip — worth billions to the right buyer. Thirty floors of corporate security, biometric locks and an AI surveillance system.',
+    emoji:'💻',loot:1400000,rep:28,pts:2,
+    tags:[{l:'TECH',c:'blue'},{l:'$1.4M',c:'gold'},{l:'MEDIUM',c:'red'}],
+    steps:[
+      {sp:'JACKAL',txt:'Silicon Tower. Glass, steel, and the kind of arrogance that forgets to patch its own firmware. The quantum chip is in the R&D vault — Floor 28. I have a contractor badge and a six-hour window before the night-shift security lead arrives.',
+       ch:[{i:'💼',t:'Enter as a tech contractor',ef:'st',ev:10,tl:'+STEALTH',tc:'g',nx:1},{i:'💻',t:'Hack the elevator access remotely',ef:'sus',ev:8,tl:'TECH',tc:'n',nx:2},{i:'🔑',t:'Clone a key card from the lobby',ef:'sus',ev:5,tl:'PRECISE',tc:'g',nx:3}]},
+      {sp:'JACKAL',txt:'Floor 28. The R&D lab hums with servers. Two researchers are still here — night owls. The vault room is behind a biometric door at the end of the corridor.',
+       ch:[{i:'🎭',t:'Pretend to run maintenance checks',ef:'st',ev:10,tl:'DISGUISE',tc:'g',nx:4},{i:'🤫',t:'Wait for them to take a break',ef:'st',ev:18,tl:'PATIENT',tc:'g',nx:4},{i:'⚡',t:'Create a server alarm — clears the floor',ef:'sus',ev:20,tl:'RISKY',tc:'b',nx:4}]},
+      {sp:'JACKAL',txt:'Elevator access granted remotely. Floor 28 — smooth. But the AI surveillance flags my movement pattern. I have about four minutes before it escalates.',
+       ch:[{i:'📡',t:'Loop the AI camera feed',ef:'sus',ev:5,tl:'TECHNICAL',tc:'n',nx:4},{i:'🏃',t:'Move fast — beat the timer',ef:'sus',ev:15,tl:'RACE CLOCK',tc:'b',nx:4}]},
+      {sp:'JACKAL',txt:'Key card cloned from a senior dev who left it on the lobby desk for twelve seconds. Sloppy. Floor 28 is quiet — the biometric door is ahead.',
+       ch:[{i:'🤲',t:'Use the lifted fingerprint',ef:'st',ev:12,tl:'+STEALTH',tc:'g',nx:4},{i:'🧬',t:'Spoof the biometric scanner',ef:'sus',ev:10,tl:'TECH',tc:'n',nx:4}]},
+      {sp:'JACKAL',txt:'The quantum chip is in a shielded case the size of a matchbox. I swap it for a dummy. Careful not to trigger the weight sensor.',
+       ch:[{i:'🧲',t:'Deactivate the weight sensor first',ef:'st',ev:15,tl:'+STEALTH',tc:'g',nx:5},{i:'⚡',t:'Quick swap — hope the sensor lags',ef:'sus',ev:20,tl:'RISKY',tc:'b',nx:5}]},
+      {sp:'JACKAL',txt:'Chip secured. The fire exit leads to the car park three floors down. Clean and direct.',
+       ch:[{i:'🚗',t:'Fire exit — straight to the car park',ef:'none',ev:0,tl:'GHOST EXIT',tc:'g',nx:'win'},{i:'💼',t:'Exit through the lobby — in character',ef:'sus',ev:12,tl:'BOLD',tc:'b',nx:'win'}]}
+    ]
+  },
+  {
+    id:4,level:5,phase:'PHASE II — CORPORATE HEISTS',phaseClass:'phase2',
+    name:'The Private Collection',loc:'STEINBERG ESTATE · UPSTATE COUNTRY MANOR',
+    desc:'Reclusive billionaire Viktor Steinberg keeps a stolen Vermeer in his private gallery. The painting was never reported stolen — because he\'s the one who stole it.',
+    emoji:'🏡',loot:3200000,rep:35,pts:2,
+    tags:[{l:'STEALTH',c:'blue'},{l:'$3.2M',c:'gold'},{l:'HARD',c:'red'}],
+    steps:[
+      {sp:'JACKAL',txt:'The Steinberg estate — forty hectares of paranoia. Viktor doesn\'t trust banks. He trusts twelve-foot perimeter walls, motion sensors, and a private security firm. I\'ve been watching the estate for two weeks. I know the rhythm.',
+       ch:[{i:'🌿',t:'Cross the grounds at 2am — sensor gap',ef:'st',ev:20,tl:'+STEALTH',tc:'g',nx:1},{i:'🚁',t:'Arrive by helicopter — bold approach',ef:'sus',ev:20,tl:'BOLD',tc:'b',nx:2},{i:'🤝',t:'Attend Viktor\'s charity dinner — invited',ef:'sus',ev:5,tl:'SOCIAL',tc:'n',nx:3}]},
+      {sp:'JACKAL',txt:'Ground approach at 2am. The sensor gap is 40 seconds every twelve minutes. I\'ve timed it four times this week. I clear the perimeter and reach the east wing.',
+       ch:[{i:'🔑',t:'Bypass the east wing door lock',ef:'st',ev:10,tl:'+STEALTH',tc:'g',nx:4},{i:'🕳️',t:'Enter via the basement coal chute',ef:'sus',ev:8,tl:'ALTERNATIVE',tc:'n',nx:4}]},
+      {sp:'JACKAL',txt:'Helicopter approach. Dramatic — and it works. Three guards scramble to the roof. The gallery is briefly unguarded.',
+       ch:[{i:'💨',t:'Move into the gallery immediately',ef:'sus',ev:15,tl:'RACE CLOCK',tc:'b',nx:4},{i:'📡',t:'Jam their radio comms first',ef:'sus',ev:5,tl:'CONTAINED',tc:'n',nx:4}]},
+      {sp:'JACKAL',txt:'Viktor\'s dinner — twelve guests, one Jackal in a borrowed identity. The gallery is locked during the event but Viktor steps out for exactly nine minutes after dessert every night.',
+       ch:[{i:'⏱️',t:'Use that nine-minute window',ef:'st',ev:20,tl:'PRECISE',tc:'g',nx:4},{i:'🍷',t:'Slip something in Viktor\'s wine — longer window',ef:'sus',ev:10,tl:'RISKY',tc:'b',nx:4}]},
+      {sp:'JACKAL',txt:'The Vermeer. Small, warm, magnificent — and behind three inches of bulletproof glass with pressure plates. Viktor really doesn\'t trust banks.',
+       ch:[{i:'🔧',t:'Disable the pressure plate circuit',ef:'st',ev:15,tl:'+STEALTH',tc:'g',nx:5},{i:'🎭',t:'Swap with a replica I prepared earlier',ef:'sus',ev:5,tl:'ELEGANT',tc:'g',nx:5}]},
+      {sp:'JACKAL',txt:'Vermeer secured. The estate is quiet. Viktor won\'t notice for three days — I\'ve replaced it with a very convincing replica.',
+       ch:[{i:'🌿',t:'Back across the grounds — same gap',ef:'none',ev:0,tl:'GHOST EXIT',tc:'g',nx:'win'},{i:'🚗',t:'Car is waiting on the north road',ef:'sus',ev:8,tl:'FAST EXIT',tc:'b',nx:'win'}]}
+    ]
+  },
+  {
+    id:5,level:6,phase:'PHASE II — CORPORATE HEISTS',phaseClass:'phase2',
+    name:'The Skyscraper Safe',loc:'KRONOS FINANCIAL TOWER · FLOOR 68',
+    desc:'The Kronos CEO keeps a personal safe on Floor 68 with unregistered bearer bonds and a USB drive that would end careers. You\'ve been hired to retrieve the drive.',
+    emoji:'🏙️',loot:2100000,rep:30,pts:2,
+    tags:[{l:'VERTICAL',c:'blue'},{l:'$2.1M',c:'gold'},{l:'HARD',c:'red'}],
+    steps:[
+      {sp:'JACKAL',txt:'Kronos Financial Tower — sixty-eight floors of money and secrets. I\'m on the building opposite, rope and grapple prepped. The CEO\'s office is a corner suite — full glass frontage, motion sensors, and a personal assistant who works until midnight.',
+       ch:[{i:'🪝',t:'Grapple across to Floor 68 window',ef:'st',ev:15,tl:'+STEALTH',tc:'g',nx:1},{i:'💼',t:'Enter as an evening cleaning crew',ef:'sus',ev:8,tl:'DISGUISE',tc:'n',nx:2},{i:'💻',t:'Hack the external elevator shaft access',ef:'sus',ev:10,tl:'TECH',tc:'b',nx:3}]},
+      {sp:'JACKAL',txt:'Grapple works. I\'m on the window ledge of Floor 68. The assistant is still at her desk, thirty feet away, back turned. The safe is behind the CEO portrait on the east wall.',
+       ch:[{i:'⏰',t:'Wait for her to step out',ef:'st',ev:20,tl:'PATIENT',tc:'g',nx:4},{i:'💨',t:'Move now while her back is turned',ef:'sus',ev:18,tl:'RISKY',tc:'b',nx:4}]},
+      {sp:'JACKAL',txt:'Cleaning crew. I\'m on the floor with two others who think I\'m new. The supervisor sends me to the executive wing. Convenient.',
+       ch:[{i:'🧹',t:'Clean toward the CEO\'s office naturally',ef:'st',ev:12,tl:'+STEALTH',tc:'g',nx:4},{i:'🎭',t:'Excuse yourself to the bathroom — slip away',ef:'sus',ev:8,tl:'COVER BREAK',tc:'n',nx:4}]},
+      {sp:'JACKAL',txt:'Elevator shaft access — smooth. Floor 68 roof hatch. I\'m in the supply corridor. The CEO\'s office is fifteen metres ahead, one guard doing rounds.',
+       ch:[{i:'🤫',t:'Time the guard\'s round',ef:'st',ev:15,tl:'PATIENT',tc:'g',nx:4},{i:'⚡',t:'Distract the guard with an emergency call',ef:'sus',ev:10,tl:'CLEVER',tc:'n',nx:4}]},
+      {sp:'JACKAL',txt:'The office. Safe behind the CEO portrait — standard combination. The USB drive and the bearer bonds are both inside.',
+       ch:[{i:'👂',t:'Crack the combination by ear',ef:'st',ev:12,tl:'+STEALTH',tc:'g',nx:5},{i:'💣',t:'Bypass with micro-charge — noisy',ef:'sus',ev:35,tl:'LAST RESORT',tc:'b',nx:5}]},
+      {sp:'JACKAL',txt:'USB drive and bonds secured. I re-hang the portrait. The assistant\'s shadow moves toward the office. Ten seconds.',
+       ch:[{i:'🪝',t:'Back out the window — grapple descent',ef:'none',ev:0,tl:'GHOST EXIT',tc:'g',nx:'win'},{i:'🏃',t:'Sprint for the elevator — cut it close',ef:'sus',ev:22,tl:'CLOSE CALL',tc:'b',nx:'win'}]}
+    ]
+  },
+  // ── PHASE 3: INTERNATIONAL ───────────────────────────────
+  {
+    id:6,level:7,phase:'PHASE III — INTERNATIONAL OPS',phaseClass:'phase3',
+    name:'The Paris Affair',loc:'MUSÉE DELACOUR · PARIS, FRANCE',
+    desc:'A Napoleon-era crown jewel was quietly reacquired by a private collector and donated to the Musée Delacour. The French government wants it back. Jackal gets paid either way.',
+    emoji:'🗼',loot:4800000,rep:42,pts:3,
+    tags:[{l:'INTERNATIONAL',c:'gold'},{l:'$4.8M',c:'gold'},{l:'HARD',c:'red'}],
+    steps:[
+      {sp:'JACKAL',txt:'Paris. The Musée Delacour is beautiful, sophisticated, and extremely well-guarded. The crown jewel is in the Napoléon Wing — reinforced glass case, infrared sensors, six guards, and a curator who sleeps in his office during special exhibitions.',
+       ch:[{i:'🎟️',t:'Attend the gala preview evening',ef:'st',ev:15,tl:'ELEGANT',tc:'g',nx:1},{i:'🌧️',t:'Infiltrate during a thunderstorm — sensors glitch',ef:'st',ev:20,tl:'WEATHER OPS',tc:'g',nx:2},{i:'🚛',t:'Pose as an art transportation crew',ef:'sus',ev:10,tl:'DISGUISE',tc:'b',nx:3}]},
+      {sp:'JACKAL',txt:'The gala. Wine, critics, and stolen glances at the security layout. I identify a blind spot in the Napoléon Wing camera coverage. Twelve square feet of freedom.',
+       ch:[{i:'📐',t:'Memorise the blind spot exactly',ef:'st',ev:20,tl:'+STEALTH',tc:'g',nx:4},{i:'📸',t:'Photograph the sensor layout discreetly',ef:'sus',ev:8,tl:'INTEL',tc:'b',nx:4}]},
+      {sp:'JACKAL',txt:'Thunderstorm cuts sensor sensitivity by 40%. The infrared is unreliable in the humidity. Nature is cooperating tonight.',
+       ch:[{i:'⚡',t:'Move through the Napoléon Wing now',ef:'st',ev:25,tl:'WEATHER WINDOW',tc:'g',nx:4},{i:'⏰',t:'Wait for peak storm — full blackout risk',ef:'st',ev:35,tl:'PATIENT GAMBLE',tc:'n',nx:4}]},
+      {sp:'JACKAL',txt:'Art transport crew. I\'m in the loading bay with three others. The crown jewel shipment manifest has been altered — I did that three days ago.',
+       ch:[{i:'📋',t:'Walk it out via the manifest',ef:'sus',ev:5,tl:'CLEAN',tc:'g',nx:4},{i:'🔄',t:'Swap the case in the loading bay',ef:'sus',ev:15,tl:'RISKY',tc:'b',nx:4}]},
+      {sp:'JACKAL',txt:'The Napoléon Wing. The crown jewel is extraordinary under the case lights — sapphires, rubies, and two hundred years of history. The display case is pressure-sensitive and laser-alarmed.',
+       ch:[{i:'🕶️',t:'Thermal goggles map the laser field',ef:'st',ev:15,tl:'PRECISE',tc:'g',nx:5},{i:'🧲',t:'Magnetic jammer on the case sensors',ef:'sus',ev:5,tl:'TECH',tc:'n',nx:5},{i:'⏱️',t:'Time the sensor cycle — 8 seconds',ef:'st',ev:20,tl:'MASTERFUL',tc:'g',nx:5}]},
+      {sp:'JACKAL',txt:'The crown secured in a velvet-lined case. The curator is snoring through the wall. The Seine is three minutes on foot.',
+       ch:[{i:'🚶',t:'Walk to the Seine — boat waiting',ef:'none',ev:0,tl:'GHOST EXIT',tc:'g',nx:'win'},{i:'🏍️',t:'Motorcycle courier — fast but visible',ef:'sus',ev:12,tl:'FAST EXIT',tc:'b',nx:'win'}]}
+    ]
+  },
+  {
+    id:7,level:8,phase:'PHASE III — INTERNATIONAL OPS',phaseClass:'phase3',
+    name:'The Dubai Tower',loc:'AL RASHID FINANCIAL CENTRE · DUBAI',
+    desc:'An oil magnate\'s private floor holds a 400-year-old Persian manuscript. The 94th floor. The building has its own police detail and a dedicated counter-theft unit.',
+    emoji:'🌃',loot:6200000,rep:48,pts:3,
+    tags:[{l:'VERTICAL',c:'blue'},{l:'$6.2M',c:'gold'},{l:'VERY HARD',c:'red'}],
+    steps:[
+      {sp:'JACKAL',txt:'Dubai. The Al Rashid Centre pierces the sky — 102 floors of steel, ambition, and poor decisions made by very rich men. Karim Al Rashid\'s private floor is on 94. I\'m at 92, checking the ventilation schematic one final time.',
+       ch:[{i:'🕳️',t:'HVAC shaft from 92 to 94',ef:'st',ev:18,tl:'+STEALTH',tc:'g',nx:1},{i:'🤵',t:'Attend the 94th floor reception — invited',ef:'sus',ev:8,tl:'SOCIAL',tc:'n',nx:2},{i:'🪝',t:'Abseil from the roof to Floor 94',ef:'sus',ev:15,tl:'EXTREME',tc:'b',nx:3}]},
+      {sp:'JACKAL',txt:'HVAC shaft. Floor 94 comes into view through the grate. Four guards, white marble, and a temperature-controlled display case at the far end housing the manuscript.',
+       ch:[{i:'⏰',t:'Wait for the prayer break — 3 guards step out',ef:'st',ev:25,tl:'CULTURAL INTEL',tc:'g',nx:4},{i:'💻',t:'Cut CCTV from the maintenance panel',ef:'sus',ev:12,tl:'TECH',tc:'b',nx:4}]},
+      {sp:'JACKAL',txt:'The reception is intimate — twelve guests, Arabic coffee, and Karim himself showing off his collection. The manuscript is across the room under glass.',
+       ch:[{i:'🎭',t:'Divert attention with a faked medical emergency',ef:'st',ev:15,tl:'CLEVER',tc:'g',nx:4},{i:'🔄',t:'Swap it with a pre-prepared replica',ef:'sus',ev:8,tl:'ELEGANT',tc:'n',nx:4}]},
+      {sp:'JACKAL',txt:'Abseil to 94. Window entry — smooth. But a guard made an unscheduled check. He\'s thirty seconds from the manuscript room.',
+       ch:[{i:'🤫',t:'Press into the wall — let him pass',ef:'st',ev:12,tl:'PATIENT',tc:'g',nx:4},{i:'⚡',t:'Intercept — non-lethal and fast',ef:'combat',ev:0,tl:'ENGAGE',tc:'b',nx:4}]},
+      {sp:'JACKAL',txt:'The manuscript — hand-painted, delicate, priceless. Temperature-controlled case with a separate alarm circuit from the room.',
+       ch:[{i:'🔧',t:'Bypass the case circuit — precise work',ef:'st',ev:18,tl:'SKILLED',tc:'g',nx:5},{i:'❄️',t:'Freeze the sensor node with cryo-spray',ef:'sus',ev:8,tl:'GADGET',tc:'n',nx:5}]},
+      {sp:'JACKAL',txt:'Manuscript wrapped in climate-preservation foil and secured. The helicopter is on the roof of the adjacent building. Sixty seconds.',
+       ch:[{i:'🪝',t:'Abseil down to the street level',ef:'none',ev:0,tl:'GHOST EXIT',tc:'g',nx:'win'},{i:'🚁',t:'Sprint to adjacent rooftop — helicopter',ef:'sus',ev:14,tl:'FAST EXIT',tc:'b',nx:'win'}]}
+    ]
+  },
+  {
+    id:8,level:9,phase:'PHASE III — INTERNATIONAL OPS',phaseClass:'phase3',
+    name:'The Tokyo Exchange',loc:'NIHON SECURITIES VAULT · TOKYO',
+    desc:'A legendary jade seal last owned by a shogun sits in the Nihon Securities private vault. The Japanese underworld has tried twice. Jackal does not try — he executes.',
+    emoji:'⛩️',loot:7500000,rep:55,pts:3,
+    tags:[{l:'PRECISION',c:'blue'},{l:'$7.5M',c:'gold'},{l:'VERY HARD',c:'red'}],
+    steps:[
+      {sp:'JACKAL',txt:'Tokyo. The Nihon Securities building is deceptive — understated exterior, extreme interior. The jade seal is in a private vault, Sub-Level 2. I\'ve spent a week studying the access logs. The window is during the annual security audit — ironic.',
+       ch:[{i:'💼',t:'Pose as an international auditor',ef:'st',ev:18,tl:'DISGUISE',tc:'g',nx:1},{i:'🕳️',t:'Enter via the underground utility tunnel',ef:'sus',ev:10,tl:'UNDERGROUND',tc:'n',nx:2},{i:'🤝',t:'Bribe an inside man — junior analyst',ef:'sus',ev:8,tl:'RISKY ALLY',tc:'b',nx:3}]},
+      {sp:'JACKAL',txt:'International auditor. Flawless credentials — three weeks of preparation. Sub-Level 2 access granted. The vault room is sixty metres down a monitored corridor.',
+       ch:[{i:'📋',t:'Walk the corridor naturally — in character',ef:'st',ev:18,tl:'+STEALTH',tc:'g',nx:4},{i:'💻',t:'Loop the corridor cameras remotely',ef:'sus',ev:8,tl:'TECH',tc:'n',nx:4}]},
+      {sp:'JACKAL',txt:'Utility tunnel. Forty minutes of tight spaces and service pipes. Sub-Level 2 access panel directly below the vault room floor.',
+       ch:[{i:'🔧',t:'Cut through the access panel quietly',ef:'st',ev:12,tl:'+STEALTH',tc:'g',nx:4},{i:'📡',t:'Disable the floor pressure sensors first',ef:'sus',ev:10,tl:'TECH',tc:'n',nx:4}]},
+      {sp:'JACKAL',txt:'The analyst — nervous, ambitious, and three months behind on rent. He gives me the vault access schedule and the guard rotation. Then he gets cold feet.',
+       ch:[{i:'🗣️',t:'Reassure him — keep him on side',ef:'st',ev:10,tl:'MANAGE ASSET',tc:'g',nx:4},{i:'💰',t:'Triple his fee — solve problems with money',ef:'sus',ev:5,tl:'EXPENSIVE',tc:'n',nx:4}]},
+      {sp:'JACKAL',txt:'The vault. The jade seal sits on a museum-grade plinth — motion sensors, UV sensors, and a dedicated vibration alarm. Beautiful engineering. Beautiful seal.',
+       ch:[{i:'🕶️',t:'Thermal map the sensor field',ef:'st',ev:15,tl:'PRECISE',tc:'g',nx:5},{i:'🧲',t:'Broad-spectrum jammer — disables all three',ef:'sus',ev:12,tl:'RISKY TECH',tc:'b',nx:5}]},
+      {sp:'JACKAL',txt:'The seal is in my hands. Ancient, cool, and heavier than expected. The auditor\'s credentials are still active. I have one clean exit vector.',
+       ch:[{i:'💼',t:'Walk out as the auditor — complete the role',ef:'none',ev:0,tl:'GHOST EXIT',tc:'g',nx:'win'},{i:'🕳️',t:'Back through the utility tunnel',ef:'sus',ev:10,tl:'REVERSE',tc:'b',nx:'win'}]}
+    ]
+  },
+  // ── PHASE 4: GOVERNMENT ──────────────────────────────────
+  {
+    id:9,level:10,phase:'PHASE IV — GOVERNMENT & MILITARY',phaseClass:'phase4',
+    name:'The Embassy Cipher',loc:'RATHMORE EMBASSY · DIPLOMATIC QUARTER',
+    desc:'A priceless encrypted codex — politically explosive, historically irreplaceable. Maximum security. Diplomatic immunity doesn\'t apply to Jackal.',
+    emoji:'🏛️',loot:9000000,rep:65,pts:3,
+    tags:[{l:'GOVERNMENT',c:'red'},{l:'$9M',c:'gold'},{l:'EXPERT',c:'red'}],
+    steps:[
+      {sp:'JACKAL',txt:'The Rathmore Embassy. Forty guards, biometric doors, dedicated counter-intelligence on the third floor. The Cipher is in the Archive Room — basement level. They call this place impenetrable. I\'ve heard that before.',
+       ch:[{i:'🎟️',t:'Attend the embassy gala — invited',ef:'st',ev:12,tl:'ELEGANT',tc:'g',nx:1},{i:'🚁',t:'Fast-rope from the adjacent building',ef:'sus',ev:18,tl:'EXTREME',tc:'b',nx:2},{i:'🤝',t:'Bribe a junior diplomat',ef:'sus',ev:8,tl:'RISKY ALLY',tc:'b',nx:3}]},
+      {sp:'JACKAL',txt:'The gala — champagne, candlelight, distracted security. I\'m in a tuxedo. The biometric door to the lower levels needs a registered handprint.',
+       ch:[{i:'🤲',t:'Lift a print from a wine glass',ef:'st',ev:18,tl:'+STEALTH',tc:'g',nx:4},{i:'🧬',t:'Spoof the biometric reader',ef:'sus',ev:12,tl:'TECH',tc:'n',nx:4}]},
+      {sp:'JACKAL',txt:'Rooftop entry. Clean — but the camera got a partial of my face. Someone reviews that footage by morning.',
+       ch:[{i:'💻',t:'Loop the camera feed remotely',ef:'sus',ev:5,tl:'CONTAINED',tc:'g',nx:4},{i:'⚡',t:'Move fast before they check',ef:'sus',ev:22,tl:'RACE CLOCK',tc:'b',nx:4}]},
+      {sp:'JACKAL',txt:'The diplomat — in debt, willing to help. Floor plan, visitor pass, access schedule. Useful man.',
+       ch:[{i:'🗂️',t:'Use the floor plan to plan entry',ef:'st',ev:20,tl:'+STEALTH',tc:'g',nx:4},{i:'👁️',t:'Have him create a diversion upstairs',ef:'sus',ev:8,tl:'RISKY ALLY',tc:'n',nx:4}]},
+      {sp:'JACKAL',txt:'Lower level. Archive Room ahead — steel door, two guards, motion sensors inside. The Cipher in a locked case beyond all of it.',
+       ch:[{i:'🕶️',t:'Map the motion sensors',ef:'st',ev:12,tl:'PRECISE',tc:'g',nx:5},{i:'📡',t:'Disable the motion grid — 90 seconds',ef:'sus',ev:18,tl:'RISKY',tc:'b',nx:5},{i:'⚡',t:'Take both guards — fast and silent',ef:'combat',ev:0,tl:'ENGAGE',tc:'b',nx:5}]},
+      {sp:'JACKAL',txt:'The Cipher in my hands — ancient, compact, worth more than this building. Guards rotate in four minutes.',
+       ch:[{i:'🎟️',t:'Walk back out through the gala',ef:'none',ev:0,tl:'GHOST EXIT',tc:'g',nx:'win'},{i:'🚁',t:'Extraction from the roof',ef:'sus',ev:12,tl:'FAST EXIT',tc:'b',nx:'win'}]}
+    ]
+  },
+  {
+    id:10,level:11,phase:'PHASE IV — GOVERNMENT & MILITARY',phaseClass:'phase4',
+    name:'The Crown Vault',loc:'NATIONAL HERITAGE DEPOSITORY · LONDON',
+    desc:'A pre-colonial crown worth £40M sits in the most secure non-military vault in Britain. Scotland Yard\'s finest designed the security. Jackal has been studying it for six months.',
+    emoji:'👑',loot:18000000,rep:75,pts:4,
+    tags:[{l:'MAXIMUM SEC',c:'red'},{l:'$18M',c:'gold'},{l:'EXPERT',c:'red'}],
+    steps:[
+      {sp:'JACKAL',txt:'London. The Heritage Depository looks like a Georgian townhouse and functions like a fortress. The crown is in Vault D — three locked doors, pressure-plate floor, motion sensors, and two armed guards on ninety-second rotations. Six months of preparation. Tonight it pays.',
+       ch:[{i:'🏛️',t:'Enter via the neighbouring building\'s basement',ef:'st',ev:22,tl:'PREPARED',tc:'g',nx:1},{i:'🎟️',t:'Attend the trustee\'s dinner — disguised',ef:'sus',ev:8,tl:'SOCIAL',tc:'n',nx:2},{i:'💻',t:'Access the vault network remotely first',ef:'sus',ev:12,tl:'TECH',tc:'n',nx:3}]},
+      {sp:'JACKAL',txt:'The neighbouring basement connects via a Victorian utility tunnel — sealed, but a bolt cutter opened it three nights ago. I\'m under the Depository now.',
+       ch:[{i:'🔧',t:'Cut up through the service floor',ef:'st',ev:18,tl:'+STEALTH',tc:'g',nx:4},{i:'📡',t:'Scan for the pressure plate layout',ef:'sus',ev:6,tl:'TECH',tc:'n',nx:4}]},
+      {sp:'JACKAL',txt:'Trustee dinner. I\'m Sir Edward Marsh, retired conservator. The vault manager mentions the Vault D alarm test is tomorrow morning. Useful.',
+       ch:[{i:'⏰',t:'Strike tonight before the test resets',ef:'st',ev:15,tl:'INTEL WIN',tc:'g',nx:4},{i:'🎭',t:'Extract the manager\'s access code socially',ef:'sus',ev:10,tl:'SOCIAL ENG',tc:'b',nx:4}]},
+      {sp:'JACKAL',txt:'Remote vault network access gained. But triggering any vault door remotely raises a silent alert to Scotland Yard. Forty-minute response time.',
+       ch:[{i:'⏱️',t:'Work within the forty-minute window',ef:'sus',ev:15,tl:'RACE CLOCK',tc:'b',nx:4},{i:'🔌',t:'Isolate the vault subnet — no outbound alert',ef:'st',ev:18,tl:'TECH MASTERY',tc:'g',nx:4}]},
+      {sp:'JACKAL',txt:'Vault D. The crown is extraordinary under the case lights — ancient gold, rubies the size of thumbnails, and history that belongs to no one building. Pressure-plate floor means I must cross without touching it.',
+       ch:[{i:'🦯',t:'Use the blueprint to step between plates',ef:'st',ev:22,tl:'PRECISE',tc:'g',nx:5},{i:'🧲',t:'Deploy magnetic suspension pads',ef:'sus',ev:10,tl:'GADGET',tc:'n',nx:5}]},
+      {sp:'JACKAL',txt:'Crown secured in the transport case. The exit is forty seconds through the tunnel. Scotland Yard is forty minutes away. Plenty of time.',
+       ch:[{i:'🕳️',t:'Back through the tunnel — clean exit',ef:'none',ev:0,tl:'GHOST EXIT',tc:'g',nx:'win'},{i:'🚗',t:'Armoured car on Piccadilly — driver waiting',ef:'sus',ev:15,tl:'BOLD EXIT',tc:'b',nx:'win'}]}
+    ]
+  },
+  {
+    id:11,level:12,phase:'PHASE IV — GOVERNMENT & MILITARY',phaseClass:'phase4',
+    name:'The Naval Archive',loc:'PORT ALBATROSS NAVAL BASE · COASTAL COMMAND',
+    desc:'Classified intelligence files — technically priceless. A foreign government wants them. Jackal doesn\'t work for governments, but this fee makes an exception worth considering.',
+    emoji:'⚓',loot:22000000,rep:82,pts:4,
+    tags:[{l:'MILITARY',c:'red'},{l:'$22M',c:'gold'},{l:'EXTREME',c:'red'}],
+    steps:[
+      {sp:'JACKAL',txt:'Port Albatross Naval Base. Perimeter patrols every four minutes, armed guards, biometric everything. The archive is in the intelligence building — Sector C. I have a naval contractor identity, a forged clearance letter, and a very short patience for obstacles.',
+       ch:[{i:'⚓',t:'Arrive by water — submersible approach',ef:'st',ev:20,tl:'COVERT',tc:'g',nx:1},{i:'💼',t:'Walk in as the contractor at 0600',ef:'sus',ev:10,tl:'BOLD',tc:'b',nx:2},{i:'💻',t:'Hack the perimeter sensor grid first',ef:'st',ev:15,tl:'TECH',tc:'g',nx:3}]},
+      {sp:'JACKAL',txt:'Submersible approach — clean. I surface at the maintenance dock, slip under the camera arc, and reach the inner perimeter. Sector C is two hundred metres ahead.',
+       ch:[{i:'🤫',t:'Move in shadow — timed with patrol gaps',ef:'st',ev:22,tl:'+STEALTH',tc:'g',nx:4},{i:'📡',t:'Jam the local comms — brief window',ef:'sus',ev:15,tl:'RISKY',tc:'b',nx:4}]},
+      {sp:'JACKAL',txt:'Contractor identity clears the main gate. The duty officer barely glances at my clearance letter. Sector C — seventy metres, two checkpoints.',
+       ch:[{i:'🎭',t:'Stay in character through both checkpoints',ef:'st',ev:15,tl:'MAINTAIN COVER',tc:'g',nx:4},{i:'🔑',t:'Clone a keycard at the second checkpoint',ef:'sus',ev:12,tl:'TECHNICAL',tc:'b',nx:4}]},
+      {sp:'JACKAL',txt:'Perimeter sensors down for eleven minutes. I\'m through the wire. The intelligence building has its own independent alarm system — unaffected by my hack.',
+       ch:[{i:'🔧',t:'Disable the building alarm from the outside panel',ef:'st',ev:18,tl:'+STEALTH',tc:'g',nx:4},{i:'⚡',t:'Enter fast and move before they notice',ef:'sus',ev:20,tl:'RACE CLOCK',tc:'b',nx:4}]},
+      {sp:'JACKAL',txt:'Sector C archive. The files are in a server rack with physical backup drives — military-grade encryption on the digital, but the physical drives are just in a locked case.',
+       ch:[{i:'🔑',t:'Pick the case lock — thirty seconds',ef:'st',ev:15,tl:'+STEALTH',tc:'g',nx:5},{i:'💻',t:'Copy the digital files while bypassing encryption',ef:'sus',ev:20,tl:'TECH',tc:'b',nx:5}]},
+      {sp:'JACKAL',txt:'Files secured. The patrol is due in ninety seconds. The maintenance dock is four minutes at a walk.',
+       ch:[{i:'⚓',t:'Back to the submersible — clean exit',ef:'none',ev:0,tl:'GHOST EXIT',tc:'g',nx:'win'},{i:'🏃',t:'Sprint the perimeter — before the patrol',ef:'sus',ev:25,tl:'DESPERATE EXIT',tc:'b',nx:'win'}]}
+    ]
+  },
+  // ── PHASE 5: LEGENDARY ───────────────────────────────────
+  {
+    id:12,level:13,phase:'PHASE V — LEGENDARY HEISTS',phaseClass:'phase5',
+    name:'The Vatican Reliquary',loc:'ARCHIVIO SEGRETO · VATICAN CITY',
+    desc:'A golden reliquary missing for three centuries — rumoured to have been quietly recovered and locked in the secret archive. The Pope\'s private security is not known for forgiveness.',
+    emoji:'⛪',loot:45000000,rep:95,pts:5,
+    tags:[{l:'LEGENDARY',c:'gold'},{l:'$45M',c:'gold'},{l:'ELITE',c:'red'}],
+    steps:[
+      {sp:'JACKAL',txt:'Vatican City. The smallest sovereign state and the most historically dense security on earth. The Archivio Segreto has stood since 1612. I\'ve been planning this for eight months. If there is a God, He\'s about to watch me work.',
+       ch:[{i:'🙏',t:'Enter as a visiting clergy scholar',ef:'st',ev:20,tl:'DEEP COVER',tc:'g',nx:1},{i:'🕳️',t:'Enter via the ancient catacombs below',ef:'st',ev:25,tl:'HISTORICAL ROUTE',tc:'g',nx:2},{i:'💻',t:'Compromise the Vatican\'s security network',ef:'sus',ev:15,tl:'DIGITAL',tc:'b',nx:3}]},
+      {sp:'JACKAL',txt:'Three weeks as Father James from the Dublin diocese. The archivists trust me. The Archivio\'s inner sanctum is unlocked for the visiting clergy on Thursdays. Today is Thursday.',
+       ch:[{i:'📚',t:'Study in the sanctum — locate the reliquary',ef:'st',ev:25,tl:'+STEALTH',tc:'g',nx:4},{i:'🎭',t:'Request an unsupervised restoration session',ef:'sus',ev:8,tl:'BOLD COVER',tc:'n',nx:4}]},
+      {sp:'JACKAL',txt:'The catacombs are ancient and largely unmapped. I\' been mapping them for six weeks. They run directly under the Archivio. The floor above is original stone — removable with the right tools.',
+       ch:[{i:'🔧',t:'Remove the floor stone — surgical precision',ef:'st',ev:22,tl:'PRECISE',tc:'g',nx:4},{i:'📡',t:'Scan upward for guards before cutting',ef:'sus',ev:5,tl:'CAREFUL',tc:'g',nx:4}]},
+      {sp:'JACKAL',txt:'Vatican network is compromised. But their physical security is independent — human guards, no digital override. I\'m in the outer archive. The inner sanctum is ahead.',
+       ch:[{i:'⏰',t:'Enter during the evening vespers service',ef:'st',ev:20,tl:'TIMING',tc:'g',nx:4},{i:'🎭',t:'Impersonate a night archivist',ef:'sus',ev:10,tl:'DISGUISE',tc:'b',nx:4}]},
+      {sp:'JACKAL',txt:'The inner sanctum. The reliquary is in a temperature-controlled case, lit by a single amber light. No digital sensors here — purely physical: two guards, a locked case, and three hundred years of expectation.',
+       ch:[{i:'👂',t:'Crack the case lock — pure skill',ef:'st',ev:20,tl:'MASTERCLASS',tc:'g',nx:5},{i:'🔄',t:'Swap with a commissioned replica',ef:'sus',ev:5,tl:'ELEGANT',tc:'g',nx:5}]},
+      {sp:'JACKAL',txt:'The reliquary. Gold, ancient, transcendent. I allow myself one breath of admiration. Then I move.',
+       ch:[{i:'🕳️',t:'Back through the catacombs — silent exit',ef:'none',ev:0,tl:'GHOST EXIT',tc:'g',nx:'win'},{i:'🚁',t:'Helicopter extraction from St. Peter\'s Square',ef:'sus',ev:20,tl:'LEGENDARY EXIT',tc:'b',nx:'win'}]}
+    ]
+  },
+  {
+    id:13,level:14,phase:'PHASE V — LEGENDARY HEISTS',phaseClass:'phase5',
+    name:'The Island Fortress',loc:'PRIVATE ISLAND · SOUTH PACIFIC',
+    desc:'Billionaire Neville Cross built an island to house the world\'s most comprehensive collection of stolen masterpieces. Jackal has been hired by every museum he robbed. Time to return what was taken.',
+    emoji:'🏝️',loot:120000000,rep:110,pts:5,
+    tags:[{l:'LEGENDARY',c:'gold'},{l:'$120M',c:'gold'},{l:'ELITE',c:'red'}],
+    steps:[
+      {sp:'JACKAL',txt:'Cross Island. No roads in, no roads out — private airstrip, dock, and a security team of thirty-two ex-special forces. The collection is in the Main Vault building at the island\'s centre. I arrive by submarine at 0300.',
+       ch:[{i:'🤿',t:'Surface at the southern beach — sensor gap',ef:'st',ev:25,tl:'COVERT',tc:'g',nx:1},{i:'✈️',t:'Arrive as a maintenance contractor — by air',ef:'sus',ev:12,tl:'BOLD',tc:'b',nx:2},{i:'💻',t:'Hack the island\'s security grid before landing',ef:'st',ev:18,tl:'TECH',tc:'g',nx:3}]},
+      {sp:'JACKAL',txt:'Southern beach. Sensor gap confirmed. The main compound is three hundred metres through dense vegetation. Twelve guards on exterior patrol.',
+       ch:[{i:'🌿',t:'Use the vegetation as cover — move slow',ef:'st',ev:25,tl:'+STEALTH',tc:'g',nx:4},{i:'📡',t:'Jam the exterior patrol radios',ef:'sus',ev:12,tl:'RISKY',tc:'b',nx:4}]},
+      {sp:'JACKAL',txt:'Airstrip arrival. Maintenance crew uniform. Three guards check credentials — mine are flawless. The Main Vault is in the east building.',
+       ch:[{i:'🎭',t:'Stay in character — head to the east building',ef:'st',ev:18,tl:'COVER',tc:'g',nx:4},{i:'🔧',t:'Access the utility crawlspace instead',ef:'sus',ev:8,tl:'COVERT',tc:'n',nx:4}]},
+      {sp:'JACKAL',txt:'Security grid compromised. Interior cameras are looped. But the vault itself runs on a separate air-gapped system — no digital access.',
+       ch:[{i:'🏃',t:'Reach the vault before the loop expires',ef:'sus',ev:18,tl:'RACE CLOCK',tc:'b',nx:4},{i:'🤫',t:'Move slow — extend the window carefully',ef:'st',ev:22,tl:'PATIENT',tc:'g',nx:4}]},
+      {sp:'JACKAL',txt:'The Main Vault. Forty metres of wall-to-wall masterpieces — Monet, Vermeer, Klimt, Basquiat. All stolen. All meant to be returned. I\'m not here to take everything. I\'m here for the ten pieces on the priority list.',
+       ch:[{i:'📋',t:'Work the list methodically — ten pieces',ef:'st',ev:20,tl:'DISCIPLINED',tc:'g',nx:5},{i:'💰',t:'Take twelve — two weren\'t on the list',ef:'sus',ev:15,tl:'TEMPTATION',tc:'b',nx:5}]},
+      {sp:'JACKAL',txt:'Masterpieces secured in custom transport cases. The submarine is waiting at the south dock. This is the one they\'ll write books about.',
+       ch:[{i:'🤿',t:'Back to the submarine — ocean exit',ef:'none',ev:0,tl:'GHOST EXIT',tc:'g',nx:'win'},{i:'✈️',t:'Charter plane from the airstrip — fast extraction',ef:'sus',ev:18,tl:'DRAMATIC EXIT',tc:'b',nx:'win'}]}
+    ]
+  },
+  {
+    id:14,level:15,phase:'PHASE V — LEGENDARY HEISTS',phaseClass:'phase5',
+    name:'The Final Contract',loc:'SOVEREIGN VAULT · UNDISCLOSED LOCATION',
+    desc:'The Contract. No name, no address — just coordinates and a number with nine zeroes. The most secure vault ever built, holding the most valuable single object known to private collectors. Jackal\'s last job. Or his greatest.',
+    emoji:'💼',loot:500000000,rep:200,pts:10,
+    tags:[{l:'THE FINALE',c:'gold'},{l:'$500M',c:'gold'},{l:'IMPOSSIBLE',c:'red'}],
+    steps:[
+      {sp:'JACKAL',txt:'The coordinates led to a mountain. Beneath it — a vault complex that isn\'t supposed to exist. No blueprints, no staff records, no public acknowledgement. Just a seven-digit code I was given, a thermal image of the interior, and the knowledge that nobody has ever walked out of here with anything. Nobody is not nobody.',
+       ch:[{i:'🏔️',t:'Enter through the mountain service access',ef:'st',ev:28,tl:'PREPARED',tc:'g',nx:1},{i:'💻',t:'Compromise the entire facility network',ef:'sus',ev:18,tl:'TOTAL HACK',tc:'n',nx:2},{i:'🎭',t:'Walk in as the man who commissioned the vault',ef:'st',ev:22,tl:'IDENTITY THEFT',tc:'g',nx:3}]},
+      {sp:'JACKAL',txt:'Service access. The tunnel is one kilometre of concrete and silence. At the end — a blast door, biometric lock, and a guard station with four armed personnel.',
+       ch:[{i:'🧬',t:'Biometric spoof — three weeks of prep',ef:'st',ev:25,tl:'MASTERWORK',tc:'g',nx:4},{i:'⚡',t:'Forced entry — controlled explosive breach',ef:'sus',ev:40,tl:'LAST RESORT',tc:'b',nx:4}]},
+      {sp:'JACKAL',txt:'Full network compromise. Cameras looped, locks digitally held open. But the inner vault is sealed with a mechanical system — no electronics. Unhackable by design.',
+       ch:[{i:'👂',t:'Physical safecrack — listening to tumblers',ef:'st',ev:30,tl:'PURE SKILL',tc:'g',nx:4},{i:'🔧',t:'Dismantle the lock mechanism entirely',ef:'sus',ev:20,tl:'DESTRUCTIVE',tc:'b',nx:4}]},
+      {sp:'JACKAL',txt:'I am Sebastian Crane — owner, architect, paranoid billionaire. The guard at the inner door has never seen Crane in person. He\'s about to.',
+       ch:[{i:'🎭',t:'Perform Crane flawlessly — wave through',ef:'st',ev:28,tl:'PERFECT COVER',tc:'g',nx:4},{i:'🗣️',t:'Crane\'s voice pattern — played from earpiece',ef:'sus',ev:8,tl:'TECH ASSIST',tc:'n',nx:4}]},
+      {sp:'JACKAL',txt:'The inner vault. A single pedestal. On it — the object. I was told what it was when I accepted the contract. Standing here, seeing it in person, I understand why someone paid five hundred million to have it taken.',
+       ch:[{i:'🎯',t:'Take it — clean, precise, final',ef:'st',ev:25,tl:'THE HEIST',tc:'g',nx:5},{i:'⏱️',t:'Study it for one minute first — memorise it',ef:'st',ev:30,tl:'GENTLEMAN',tc:'g',nx:5}]},
+      {sp:'JACKAL',txt:'It\'s done. The vault is sealed behind me. The extraction team is outside. Somewhere a client is waiting. Somewhere a legend is being written. Jackal never gets caught. Jackal never stops.',
+       ch:[{i:'🚁',t:'Helicopter extraction — sunrise flight',ef:'none',ev:0,tl:'LEGACY EXIT',tc:'g',nx:'win'},{i:'🚶',t:'Walk out through the mountain alone — vanish',ef:'none',ev:0,tl:'GHOST LEGEND',tc:'g',nx:'win'}]}
+    ]
+  }
+];
+
+// ============================================================
+//  UTILITIES
+// ============================================================
+const $ = id => document.getElementById(id);
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+  if(id==='mapscreen') renderMap();
+  if(id==='upgradescreen') renderUpgrades();
+}
+function toast(msg){
+  const t=$('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>t.classList.remove('show'),2800);
+}
+function fmt(n){
+  if(n>=1000000000) return '$'+(n/1000000000).toFixed(0)+'B';
+  if(n>=1000000)    return '$'+(n/1000000).toFixed(1)+'M';
+  if(n>=1000)       return '$'+(n/1000).toFixed(0)+'K';
+  return '$'+n;
+}
+
+// ============================================================
+//  MAP RENDER
+// ============================================================
+const PHASES = ['PHASE I — CITY TARGETS','PHASE II — CORPORATE HEISTS','PHASE III — INTERNATIONAL OPS','PHASE IV — GOVERNMENT & MILITARY','PHASE V — LEGENDARY HEISTS'];
+function renderMap(){
+  $('m-rep').textContent  = G.rep;
+  $('m-loot').textContent = fmt(G.totalLoot);
+  $('m-wins').textContent = G.wins+'/15';
+  $('m-pts').textContent  = G.upgPts;
+  const scroll = $('map-scroll');
+  scroll.innerHTML='';
+  // Update progress bar
+  const pct = Math.round((G.wins/15)*100);
+  const pb = document.getElementById('progress-bar');
+  const pp = document.getElementById('progress-pct');
+  if(pb){ pb.style.width=pct+'%'; }
+  if(pp){ pp.textContent=pct+'%'; }
+
+  PHASES.forEach(phase=>{
+    const ms = MISSIONS.filter(m=>m.phase===phase);
+    const lbl=document.createElement('div');
+    lbl.className='map-phase-label';
+    lbl.textContent=phase;
+    scroll.appendChild(lbl);
+    const grid=document.createElement('div');
+    grid.className='map-grid';
+    ms.forEach(m=>{
+      const isLocked = m.id>0 && !G.done.includes(m.id-1);
+      const isDone   = G.done.includes(m.id);
+      const node=document.createElement('div');
+      node.className=`map-node ${m.phaseClass}${isLocked?' locked':''}${isDone?' done':''}`;
+      node.innerHTML=`
+        <div class="map-node-emoji">${m.emoji}</div>
+        <div class="map-node-lvl">LVL ${m.level}</div>
+        <div class="map-node-name">${m.name}</div>
+        <div class="map-node-loot">${fmt(m.loot)}</div>
+        ${isLocked?'<div class="map-lock-icon">🔒</div>':''}
+      `;
+      if(!isLocked) node.onclick=()=>{ SFX.play('click'); startMission(m.id); };
+      grid.appendChild(node);
+    });
+    scroll.appendChild(grid);
+  });
+}
+
+// ============================================================
+//  UPGRADES RENDER
+// ============================================================
+function renderUpgrades(){
+  $('upg-pts-display').textContent = G.upgPts;
+  ['stealth','combat','gadget'].forEach(cat=>{
+    const grid = $('upg-'+cat+'-grid');
+    grid.innerHTML='';
+    UPGRADES[cat].forEach(u=>{
+      const lv=G.upgrades[u.key];
+      const maxed=lv>=u.maxLv;
+      const canAfford=G.upgPts>=u.cost;
+      const pips=Array.from({length:u.maxLv},(_,i)=>`<div class="upg-pip${i<lv?' filled':''}"></div>`).join('');
+      const card=document.createElement('div');
+      card.className='upg-card'+(maxed?' maxed':'');
+      card.innerHTML=`
+        <div class="upg-card-icon">${u.icon}</div>
+        <div class="upg-card-name">${u.name}</div>
+        <div class="upg-card-desc">${u.desc}</div>
+        <div class="upg-card-level">${pips}</div>
+        <button class="upg-card-btn${maxed?' maxed-btn':''}" ${(!canAfford&&!maxed)?'disabled':''} onclick="buyUpgrade('${u.key}','${cat}')">
+          ${maxed?'✓ MAXED':`UPGRADE (${u.cost} PTS)`}
+        </button>
+      `;
+      grid.appendChild(card);
+    });
+  });
+}
+function buyUpgrade(key,cat){
+  const u = UPGRADES[cat].find(x=>x.key===key);
+  if(!u||G.upgrades[key]>=u.maxLv||G.upgPts<u.cost) return;
+  G.upgrades[key]++;
+  G.upgPts-=u.cost;
+  SFX.play('upgrade');
+  showStatPopup('⬆ LV '+G.upgrades[key], u.name.toUpperCase());
+  toast(`✅ ${u.name} upgraded to Lv ${G.upgrades[key]}`);
+  renderUpgrades();
+}
+
+// ============================================================
+//  MISSION START
+// ============================================================
+function startMission(id){
+  const m=MISSIONS[id];
+  G.current=id; G.step=0;
+  G.hp=100; G.stealth=100; G.suspicion=0;
+  G.runLoot=m.loot; G.runRep=m.rep;
+  $('scene-emoji').textContent=m.emoji;
+  $('scene-loc').textContent=m.loc;
+  $('scene-phase').textContent=m.phase;
+  SFX.play('click');
+  // Show cutscene then start game
+  showCutscene(id, ()=>{
+    updateHUD();
+    showScreen('game');
+    SFX.startMusic();
+    renderStep(0);
+  });
+}
+
+// ============================================================
+//  RENDER STEP
+// ============================================================
+function renderStep(idx){
+  const m=MISSIONS[G.current];
+  const s=m.steps[idx];
+  G.step=idx;
+  $('n-speaker').textContent=s.sp;
+  $('n-text').textContent=s.txt;
+  $('combat-modal').classList.remove('active');
+  const box=$('choices');
+  box.innerHTML='';
+  s.ch.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.className='choice-btn';
+    btn.innerHTML=`<span class="choice-icon">${c.i}</span><span class="choice-text">${c.t}</span><span class="choice-tag ${c.tc}">${c.tl}</span>`;
+    btn.onclick=()=>{ SFX.play('click'); pick(c); };
+    box.appendChild(btn);
+  });
+}
+
+// ============================================================
+//  PICK CHOICE — apply upgrades
+// ============================================================
+function pick(c){
+  // Apply upgrade modifiers
+  let susReduction = 1 - (G.upgrades.shadow * 0.15);
+
+  if(c.ef==='st'){
+    if(c.ev>0){
+      let bonus = c.ev + (G.upgrades.lockpick*10*(c.i==='🔑'||c.t.toLowerCase().includes('lock')?1:0));
+      G.stealth=Math.min(100,G.stealth+bonus);
+      toast(`🤫 STEALTH +${c.ev}`);
+      SFX.play('stealth');
+    } else {
+      G.stealth=Math.max(0,G.stealth+c.ev);
+      let sus = Math.round(-c.ev * susReduction);
+      G.suspicion=Math.min(100,G.suspicion+sus);
+      toast(`⚠ SUSPICION RISING`);
+      SFX.play('suspicion');
+    }
+  } else if(c.ef==='sus'){
+    let base = Math.round(c.ev * susReduction);
+    if(c.t.toLowerCase().includes('hack')||c.i==='💻') base=Math.max(0,base-(G.upgrades.hacker*10));
+    G.suspicion=Math.min(100,G.suspicion+base);
+    if(base>0){ toast(`⚠ SUSPICION +${base}`); SFX.play('suspicion'); }
+    else{ toast(`✅ SUSPICION NEUTRALISED`); SFX.play('stealth'); }
+  } else if(c.ef==='loot'){
+    G.runLoot+=c.ev; toast(`💰 BONUS LOOT +${fmt(c.ev)}`); SFX.play('loot'); showStatPopup('+'+fmt(c.ev),'BONUS LOOT');
+  } else if(c.ef==='combat'){
+    updateHUD();
+    triggerFight(()=>{ c.nx==='win'?endMission(true):renderStep(c.nx); });
+    return;
+  }
+  updateHUD();
+  if(G.hp<=0){ endMission(false); return; }
+  if(c.nx==='win') endMission(true);
+  else renderStep(c.nx);
+  // random guard event
+  if(G.suspicion>=65 && Math.random()<(0.3-(G.upgrades.scanner*0.08))){
+    setTimeout(()=>{ toast('💂 UNSCHEDULED PATROL!'); SFX.play('alert'); triggerFight(()=>{}); },800);
+  }
+}
+
+// ============================================================
+//  HUD UPDATE
+// ============================================================
+function updateHUD(){
+  $('bar-hp').style.width  = G.hp+'%';
+  $('bar-st').style.width  = G.stealth+'%';
+  $('bar-sus').style.width = G.suspicion+'%';
+  const a=$('alert');
+  if(G.suspicion<30)      { a.textContent='● SAFE';    a.className='alert-pill safe'; }
+  else if(G.suspicion<65) { a.textContent='● CAUTION'; a.className='alert-pill caution'; }
+  else                    { a.textContent='● DANGER';  a.className='alert-pill danger'; }
+}
+
+// ============================================================
+//  COMBAT
+// ============================================================
+function triggerFight(cb){
+  G.fightCb=cb;
+  $('combat-modal').classList.add('active');
+  $('combat-msg').textContent='A guard has spotted Jackal. Choose your move.';
+  SFX.play('alert'); SFX.stopMusic();
+  $('combat-enemy').textContent='💂';
+  $('combat-enemy2').textContent='💂';
+}
+function fight(act){
+  const msg=$('combat-msg'), en=$('combat-enemy'), en2=$('combat-enemy2');
+  let ok=false;
+  const resist = G.upgrades.resilience * 5;
+  if(act==='shoot'){
+    let rate = 0.75 + (G.upgrades.accuracy*0.08);
+    ok=Math.random()<Math.min(0.95,rate);
+    if(ok){ G.suspicion=Math.min(100,G.suspicion+22); msg.textContent='🔫 Shot fired. Guard down — but noise carries. Suspicion +22.'; SFX.play('gunshot'); flash('red'); }
+    else  { G.hp=Math.max(0,G.hp-Math.max(5,20-resist)); msg.textContent=`🔫 He fired first. Jackal takes a hit. HP -${20-resist}.`; SFX.play('gunshot'); flash('red'); SFX.play('alert'); }
+  } else if(act==='evade'){
+    let base = G.upgrades.evasion>=2 ? 0.75 : G.stealth/110;
+    ok=Math.random()<Math.min(0.9,base+(G.upgrades.evasion*0.1));
+    if(ok){ G.stealth=Math.max(0,G.stealth-8); msg.textContent='🏃 Slipped into shadow. Close. Stealth -8.'; SFX.play('footstep'); flash('gold'); }
+    else  { G.hp=Math.max(0,G.hp-Math.max(5,15-resist)); G.suspicion=Math.min(100,G.suspicion+15); msg.textContent=`🏃 Evade failed. Took a blow. HP -${15-resist}, Suspicion +15.`; SFX.play('punch'); flash('red'); }
+  } else if(act==='disarm'){
+    let rate = 0.6 + (G.upgrades.disarmSkill*0.12);
+    ok=Math.random()<Math.min(0.95,rate);
+    if(ok){ G.suspicion=Math.max(0,G.suspicion-5); msg.textContent='🥋 Textbook disarm. Guard down, silent and unhurt. Pure Jackal.'; SFX.play('punch'); flash('gold'); }
+    else  { G.hp=Math.max(0,G.hp-Math.max(5,25-resist)); msg.textContent=`🥋 Overconfident. HP -${25-resist}.`; SFX.play('punch'); flash('red'); }
+  } else {
+    const fleeAlwaysWorks = G.upgrades.smokeKit>=3;
+    ok= fleeAlwaysWorks || Math.random()<0.85;
+    const stCost = Math.max(5, 18-(G.upgrades.smokeKit*5));
+    G.stealth=Math.max(0,G.stealth-stCost); G.suspicion=Math.min(100,G.suspicion+6);
+    msg.textContent=`💨 Fled. He'll remember the red blazer. Stealth -${stCost}.`; SFX.play('footstep');
+  }
+  updateHUD();
+  en.textContent=ok?'😵':'😡';
+  en2.textContent=ok?'😵':'😡';
+  setTimeout(()=>{
+    $('combat-modal').classList.remove('active');
+    SFX.startMusic();
+    if(G.hp<=0) endMission(false);
+    else if(G.fightCb){ G.fightCb(); G.fightCb=null; }
+  },2200);
+}
+
+// ============================================================
+//  END MISSION
+// ============================================================
+function endMission(win){
+  const ranks=['F','C','B','A','S','S+'];
+  let ri=0;
+  if(win){
+    if(G.stealth>80&&G.suspicion<12) ri=5;
+    else if(G.stealth>65&&G.suspicion<25) ri=4;
+    else if(G.stealth>50&&G.suspicion<45) ri=3;
+    else if(G.stealth>35) ri=2;
+    else if(G.hp>50) ri=1;
+    G.wins++; G.totalLoot+=G.runLoot; G.rep+=G.runRep;
+    const pts = MISSIONS[G.current].pts;
+    G.upgPts += pts;
+    if(G.suspicion<20) G.ghosts++;
+    if(!G.done.includes(G.current)) G.done.push(G.current);
+    if(G.current+1<MISSIONS.length){ MISSIONS[G.current+1].locked=false; setTimeout(()=>SFX.play('unlock'),800); }
+    if(G.wins===15){ setTimeout(showAllComplete,2000); }
+    SFX.stopMusic(); SFX.play('heistComplete'); flash('gold');
+    $('o-title').textContent = G.suspicion<12?'👻 GHOST COMPLETE':'✅ HEIST COMPLETE';
+    $('o-title').className='outcome-title win';
+    $('o-quote').textContent = G.suspicion<12
+      ? '"They found nothing. Not a shadow, not a footprint."'
+      : '"Another city, another legend. The Jackal never sleeps."';
+    $('o-pts').textContent='+'+pts;
+    $('o-btn').textContent='NEXT MISSION';
+    $('o-btn').onclick=()=>showScreen('mapscreen');
+  } else {
+    SFX.stopMusic(); SFX.play('missionFail'); flash('red');
+    $('o-title').textContent='💀 MISSION FAILED';
+    $('o-title').className='outcome-title lose';
+    $('o-quote').textContent='"Even the finest blade can dull. Rest. Recalibrate. Return."';
+    $('o-pts').textContent='+0';
+    $('o-btn').textContent='TRY AGAIN';
+    $('o-btn').onclick=()=>startMission(G.current);
+    G.runLoot=0; G.runRep=0; ri=0;
+  }
+  $('o-loot').textContent=fmt(G.runLoot);
+  $('o-rep').textContent ='+'+G.runRep;
+  $('o-rank').textContent=win?ranks[ri]:'F';
+  $('o-score').textContent=calcScore().toLocaleString();
+  showScreen('outcome');
+}
+
+
+// ============================================================
+//  SOUND ENGINE — Web Audio API (no external files needed)
+// ============================================================
+const SFX = (()=>{
+  let ctx = null;
+  let musicNode = null, musicGain = null;
+  let enabled = true;
+
+  function getCtx(){
+    if(!ctx) ctx = new (window.AudioContext||window.webkitAudioContext)();
+    if(ctx.state==='suspended') ctx.resume();
+    return ctx;
+  }
+
+  function tone(freq, type, duration, vol, delay=0, fadeOut=true){
+    if(!enabled) return;
+    try{
+      const c=getCtx();
+      const o=c.createOscillator();
+      const g=c.createGain();
+      o.connect(g); g.connect(c.destination);
+      o.type=type; o.frequency.setValueAtTime(freq, c.currentTime+delay);
+      g.gain.setValueAtTime(vol, c.currentTime+delay);
+      if(fadeOut) g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+delay+duration);
+      o.start(c.currentTime+delay);
+      o.stop(c.currentTime+delay+duration+0.05);
+    }catch(e){}
+  }
+
+  function noise(duration, vol=0.1){
+    if(!enabled) return;
+    try{
+      const c=getCtx();
+      const bufSize=c.sampleRate*duration;
+      const buf=c.createBuffer(1,bufSize,c.sampleRate);
+      const data=buf.getChannelData(0);
+      for(let i=0;i<bufSize;i++) data[i]=(Math.random()*2-1);
+      const src=c.createBufferSource();
+      const g=c.createGain();
+      const filter=c.createBiquadFilter();
+      filter.type='bandpass'; filter.frequency.value=800;
+      src.buffer=buf;
+      src.connect(filter); filter.connect(g); g.connect(c.destination);
+      g.gain.setValueAtTime(vol,c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+duration);
+      src.start(); src.stop(c.currentTime+duration+0.05);
+    }catch(e){}
+  }
+
+  // Individual sound effects
+  const sounds = {
+    click(){
+      tone(880,'sine',.08,.15);
+      tone(1100,'sine',.06,.08,.04);
+    },
+    success(){
+      tone(523,'sine',.12,.18);
+      tone(659,'sine',.12,.18,.1);
+      tone(784,'sine',.2,.18,.2);
+      tone(1047,'sine',.3,.18,.32);
+    },
+    fail(){
+      tone(220,'sawtooth',.3,.2);
+      tone(180,'sawtooth',.4,.15,.1);
+      tone(150,'sawtooth',.5,.1,.2);
+    },
+    alert(){
+      tone(880,'square',.1,.15);
+      tone(880,'square',.1,.15,.15);
+      tone(1320,'square',.15,.2,.3);
+    },
+    gunshot(){
+      noise(.08,.3);
+      tone(120,'sawtooth',.15,.2);
+      tone(80,'sine',.2,.15,.05);
+    },
+    punch(){
+      noise(.06,.25);
+      tone(100,'sine',.08,.2);
+    },
+    footstep(){
+      noise(.04,.06);
+      tone(200,'sine',.05,.05);
+    },
+    unlock(){
+      tone(1200,'sine',.06,.1);
+      tone(1400,'sine',.06,.1,.08);
+      tone(1600,'sine',.08,.12,.16);
+    },
+    suspicion(){
+      tone(440,'triangle',.15,.12);
+      tone(380,'triangle',.2,.1,.1);
+    },
+    stealth(){
+      tone(600,'sine',.1,.06);
+      tone(800,'sine',.15,.06,.08);
+    },
+    loot(){
+      tone(880,'sine',.08,.15);
+      tone(1108,'sine',.08,.15,.06);
+      tone(1318,'sine',.12,.15,.12);
+      tone(1760,'sine',.2,.12,.2);
+    },
+    heistComplete(){
+      [523,659,784,1047,784,1047,1319].forEach((f,i)=>{
+        tone(f,'sine',.15,.2,i*.1);
+      });
+    },
+    missionFail(){
+      [400,350,300,250,200].forEach((f,i)=>{
+        tone(f,'sawtooth',.18,.15,i*.12);
+      });
+    },
+    cutscene(){
+      tone(220,'sine',.5,.08);
+      tone(277,'sine',.5,.06,.2);
+      tone(330,'sine',.8,.06,.4);
+    },
+    upgrade(){
+      [440,554,659,880].forEach((f,i)=>tone(f,'sine',.12,.15,i*.08));
+    }
+  };
+
+  // Ambient music loop using oscillators
+  function startMusic(){
+    if(!enabled||musicNode) return;
+    try{
+      const c=getCtx();
+      musicGain=c.createGain();
+      musicGain.gain.value=0.04;
+      musicGain.connect(c.destination);
+
+      // Slow, tense bass drone
+      const bass=c.createOscillator();
+      bass.type='sine'; bass.frequency.value=55;
+      bass.connect(musicGain); bass.start();
+
+      // Mid pad
+      const pad=c.createOscillator();
+      pad.type='triangle'; pad.frequency.value=110;
+      const padG=c.createGain(); padG.gain.value=0.5;
+      pad.connect(padG); padG.connect(musicGain); pad.start();
+
+      // Slow LFO on pad
+      const lfo=c.createOscillator();
+      const lfoG=c.createGain(); lfoG.gain.value=8;
+      lfo.frequency.value=0.2; lfo.type='sine';
+      lfo.connect(lfoG); lfoG.connect(pad.frequency); lfo.start();
+
+      // High tension pulse
+      const hi=c.createOscillator();
+      hi.type='sine'; hi.frequency.value=330;
+      const hiG=c.createGain(); hiG.gain.value=0.2;
+      hi.connect(hiG); hiG.connect(musicGain); hi.start();
+
+      musicNode=[bass,pad,lfo,hi];
+    }catch(e){}
+  }
+
+  function stopMusic(){
+    if(!musicNode) return;
+    try{
+      if(musicGain) musicGain.gain.setTargetAtTime(0,ctx.currentTime,.3);
+      setTimeout(()=>{ musicNode.forEach(n=>{try{n.stop()}catch(e){}}); musicNode=null; },400);
+    }catch(e){ musicNode=null; }
+  }
+
+  function toggle(){
+    enabled=!enabled;
+    const btn=document.getElementById('music-btn');
+    if(enabled){ startMusic(); if(btn) btn.textContent='🎵'; }
+    else { stopMusic(); if(btn) btn.textContent='🔇'; }
+    return enabled;
+  }
+
+  return { play:(name)=>{ if(sounds[name]) sounds[name](); }, startMusic, stopMusic, toggle, isEnabled:()=>enabled };
+})();
+
+function toggleMusic(){ SFX.toggle(); }
+
+// ============================================================
+//  SCREEN FLASH
+// ============================================================
+function flash(type='red'){
+  const el=document.getElementById('flash');
+  el.className='flash-overlay '+type+' show';
+  setTimeout(()=>el.classList.remove('show'),120);
+}
+
+// ============================================================
+//  CUTSCENE SYSTEM
+// ============================================================
+const CUTSCENES = {
+  0:{ phase:'PHASE I — CITY TARGETS', story:'"Every legend starts somewhere. Mine started in a gallery, in the dark, with a painting that didn't belong to its owner. I'm Jackal. And I never get caught."' },
+  1:{ phase:'PHASE I — CITY TARGETS', story:'"A penthouse suite, a diamond merchant, and a party where everyone was too busy impressing each other to notice me. Just how I like it."' },
+  2:{ phase:'PHASE I — CITY TARGETS', story:'"The Harrington Blue. They said the vault was impenetrable. They say that about every vault. They're always wrong."' },
+  3:{ phase:'PHASE II — CORPORATE HEISTS', story:'"Silicon Valley runs on greed and bad passwords. A quantum chip worth billions, sitting in a tower that forgot that walls can be climbed."' },
+  4:{ phase:'PHASE II — CORPORATE HEISTS', story:'"Viktor Steinberg built a fortress to keep his stolen art safe. A thief guarding stolen goods. The irony wasn't lost on me."' },
+  5:{ phase:'PHASE II — CORPORATE HEISTS', story:'"Floor 68. The CEO kept his secrets sixty-eight floors above the city, thinking altitude was security. It isn't."' },
+  6:{ phase:'PHASE III — INTERNATIONAL OPS', story:'"Paris. The city of lights — and, tonight, one fewer crown jewel. The Musée Delacour was beautiful. I'll miss it."' },
+  7:{ phase:'PHASE III — INTERNATIONAL OPS', story:'"Dubai. They built towers to touch the sky. I used one as a ladder. The manuscript was waiting on Floor 94 like it knew I was coming."' },
+  8:{ phase:'PHASE III — INTERNATIONAL OPS', story:'"Tokyo. Precise, disciplined, impossible to fool. Almost. The jade seal of a shogun — and the one score that proved I operate above borders."' },
+  9:{ phase:'PHASE IV — GOVERNMENT & MILITARY', story:'"The Rathmore Embassy. They have diplomats, intelligence units, and forty guards. I have patience, a tuxedo, and a very good memory."' },
+  10:{ phase:'PHASE IV — GOVERNMENT & MILITARY', story:'"The Crown Vault. Scotland Yard's finest security. Six months of preparation. Tonight, London loses a crown it didn't know it had."' },
+  11:{ phase:'PHASE IV — GOVERNMENT & MILITARY', story:'"A naval base. Classified files. Thirty-two ex-special forces. Every man has a blind spot. I spent weeks finding theirs."' },
+  12:{ phase:'PHASE V — LEGENDARY HEISTS', story:'"The Vatican. The smallest country, the oldest secrets, and a reliquary missing for three centuries. If God is watching — I hope He appreciates the craftsmanship."' },
+  13:{ phase:'PHASE V — LEGENDARY HEISTS', story:'"Cross Island. A billionaire's private fortress of stolen masterpieces. This isn't just a heist. It's justice. Expensive, elegant justice."' },
+  14:{ phase:'PHASE V — LEGENDARY HEISTS', story:'"The Final Contract. No name. No location. Just coordinates, a number with nine zeroes, and the knowledge that nobody has ever walked out of this vault with anything. I am not nobody."' }
+};
+
+let cutsceneCallback = null;
+
+function showCutscene(missionId, onComplete){
+  const c = CUTSCENES[missionId];
+  const m = MISSIONS[missionId];
+  if(!c || !m){ onComplete(); return; }
+
+  cutsceneCallback = onComplete;
+  document.getElementById('cut-phase').textContent = c.phase;
+  document.getElementById('cut-title').textContent = m.name.toUpperCase();
+  document.getElementById('cut-loc').textContent = m.loc;
+  document.getElementById('cut-story').textContent = c.story;
+
+  // Reset animations by re-cloning animated elements
+  const cs = document.getElementById('cutscene');
+  cs.classList.add('active');
+  SFX.play('cutscene');
+  SFX.stopMusic();
+
+  // Click/tap anywhere to continue
+  cs.onclick = (e)=>{
+    if(e.target.classList.contains('cut-skip')) return;
+    skipCutscene();
+  };
+
+  // Auto-advance after 7 seconds
+  cs._autoTimer = setTimeout(skipCutscene, 7000);
+}
+
+function skipCutscene(){
+  const cs = document.getElementById('cutscene');
+  clearTimeout(cs._autoTimer);
+  cs.classList.remove('active');
+  cs.onclick = null;
+  SFX.startMusic();
+  if(cutsceneCallback){ cutsceneCallback(); cutsceneCallback=null; }
+}
+
+// ============================================================
+//  STAT POPUP (floating number animation)
+// ============================================================
+function showStatPopup(text, sub){
+  const p = document.createElement('div');
+  p.className = 'stat-popup';
+  p.innerHTML = `<div class="stat-popup-val">${text}</div><div class="stat-popup-lbl">${sub}</div>`;
+  document.body.appendChild(p);
+  requestAnimationFrame(()=>p.classList.add('show'));
+  setTimeout(()=>{
+    p.classList.remove('show');
+    setTimeout(()=>p.remove(),400);
+  },1400);
+}
+
+// ============================================================
+//  SAVE SYSTEM
+// ============================================================
+const SAVE_KEY = 'jackal_save_v1';
+
+function saveGame(){
+  const data = {
+    rep: G.rep, totalLoot: G.totalLoot, wins: G.wins,
+    ghosts: G.ghosts, upgPts: G.upgPts,
+    done: G.done, upgrades: G.upgrades,
+    savedAt: Date.now()
+  };
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    toast('💾 GAME SAVED');
+  } catch(e){ toast('⚠ SAVE FAILED'); }
+}
+
+function loadGame(){
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return false;
+    const data = JSON.parse(raw);
+    G.rep=data.rep||0; G.totalLoot=data.totalLoot||0;
+    G.wins=data.wins||0; G.ghosts=data.ghosts||0;
+    G.upgPts=data.upgPts||0; G.done=data.done||[];
+    G.upgrades=Object.assign({shadow:0,disguise:0,lockpick:0,timing:0,accuracy:0,disarmSkill:0,evasion:0,resilience:0,jammer:0,hacker:0,smokeKit:0,scanner:0}, data.upgrades||{});
+    // unlock missions
+    G.done.forEach(id=>{ if(id+1<MISSIONS.length) MISSIONS[id+1].locked=false; });
+    return true;
+  } catch(e){ return false; }
+}
+
+function deleteSave(){
+  if(!confirm('Delete all save data? This cannot be undone.')) return;
+  localStorage.removeItem(SAVE_KEY);
+  // reset state
+  G.rep=0;G.totalLoot=0;G.wins=0;G.ghosts=0;G.upgPts=0;G.done=[];
+  G.upgrades={shadow:0,disguise:0,lockpick:0,timing:0,accuracy:0,disarmSkill:0,evasion:0,resilience:0,jammer:0,hacker:0,smokeKit:0,scanner:0};
+  MISSIONS.forEach((m,i)=>{ if(i>0) m.locked=true; });
+  toast('🗑 SAVE DELETED');
+  renderMap();
+}
+
+function getSaveInfo(){
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return null;
+    return JSON.parse(raw);
+  } catch(e){ return null; }
+}
+
+// Auto-save after every mission end
+const _origEnd = endMission;
+// patch endMission to auto-save
+function endMissionWithSave(win){
+  _origEnd(win);
+  if(win) saveGame();
+}
+
+// ============================================================
+//  LEADERBOARD SYSTEM
+// ============================================================
+const LB_KEY = 'jackal_leaderboard_v1';
+
+function getLeaderboard(){
+  try {
+    const raw = localStorage.getItem(LB_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e){ return []; }
+}
+
+function addLeaderboardEntry(name, score, loot, wins, rank){
+  const lb = getLeaderboard();
+  lb.push({ name, score, loot, wins, rank, date: new Date().toLocaleDateString() });
+  lb.sort((a,b)=>b.score-a.score);
+  const top = lb.slice(0,10);
+  try { localStorage.setItem(LB_KEY, JSON.stringify(top)); } catch(e){}
+  return top;
+}
+
+function calcScore(){
+  return (G.rep * 1000) + Math.floor(G.totalLoot/1000) + (G.ghosts * 5000) + (G.wins * 2000);
+}
+
+// ============================================================
+//  LEADERBOARD SCREEN HTML (injected dynamically)
+// ============================================================
+function showLeaderboard(){
+  const lb = getLeaderboard();
+  const score = calcScore();
+  const existing = document.getElementById('lb-modal');
+  if(existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'lb-modal';
+  modal.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:300;
+    display:flex;flex-direction:column;align-items:center;
+    font-family:'Share Tech Mono',monospace;overflow-y:auto;padding:20px 16px 30px;
+  `;
+
+  const rankColors = ['#f0c060','#c0c0c0','#cd7f32','#e8e0d8','#e8e0d8'];
+
+  let rows = lb.length === 0
+    ? '<div style="color:#7a7068;font-size:12px;text-align:center;padding:30px 0;letter-spacing:.2em;">NO SCORES YET<br><br>COMPLETE MISSIONS TO APPEAR HERE</div>'
+    : lb.map((e,i)=>`
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-left:3px solid ${rankColors[Math.min(i,4)]};margin-bottom:8px;">
+        <div style="font-family:'Cinzel',serif;font-size:18px;color:${rankColors[Math.min(i,4)]};min-width:28px;">${i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`}</div>
+        <div style="flex:1;">
+          <div style="font-family:'Cinzel',serif;font-size:13px;color:#f0ece8;">${e.name}</div>
+          <div style="font-size:9px;color:#7a7068;letter-spacing:.15em;margin-top:2px;">${e.wins} HEISTS · ${e.rank} RANK · ${e.date}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:'Cinzel',serif;font-size:15px;color:#c9993a;">${e.score.toLocaleString()}</div>
+          <div style="font-size:8px;color:#7a7068;letter-spacing:.1em;">${fmt(e.loot)}</div>
+        </div>
+      </div>`).join('');
+
+  modal.innerHTML = `
+    <div style="width:100%;max-width:420px;">
+      <div style="font-family:'Cinzel',serif;font-size:22px;color:#c9993a;letter-spacing:.15em;text-align:center;margin-bottom:4px;">🏆 LEADERBOARD</div>
+      <div style="font-size:9px;color:#7a7068;letter-spacing:.3em;text-align:center;margin-bottom:20px;">TOP GENTLEMAN THIEVES</div>
+
+      <div style="background:rgba(201,153,58,0.08);border:1px solid rgba(201,153,58,0.25);padding:14px;margin-bottom:16px;display:flex;gap:20px;justify-content:center;flex-wrap:wrap;">
+        <div style="text-align:center;"><div style="font-family:'Cinzel',serif;font-size:20px;color:#f0c060;">${score.toLocaleString()}</div><div style="font-size:8px;color:#7a7068;letter-spacing:.15em;">YOUR SCORE</div></div>
+        <div style="text-align:center;"><div style="font-family:'Cinzel',serif;font-size:20px;color:#f0c060;">${G.wins}</div><div style="font-size:8px;color:#7a7068;letter-spacing:.15em;">HEISTS</div></div>
+        <div style="text-align:center;"><div style="font-family:'Cinzel',serif;font-size:20px;color:#f0c060;">${G.ghosts}</div><div style="font-size:8px;color:#7a7068;letter-spacing:.15em;">GHOST EXITS</div></div>
+        <div style="text-align:center;"><div style="font-family:'Cinzel',serif;font-size:20px;color:#f0c060;">${fmt(G.totalLoot)}</div><div style="font-size:8px;color:#7a7068;letter-spacing:.15em;">TOTAL LOOT</div></div>
+      </div>
+
+      <div style="margin-bottom:14px;">${rows}</div>
+
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;" id="lb-entry-area">
+        <div style="font-size:9px;color:#7a7068;letter-spacing:.2em;text-align:center;">SUBMIT YOUR SCORE TO THE BOARD</div>
+        <input id="lb-name-input" maxlength="16" placeholder="ENTER YOUR NAME"
+          style="background:rgba(255,255,255,0.04);border:1px solid rgba(201,153,58,0.3);color:#f0ece8;font-family:'Share Tech Mono',monospace;font-size:12px;padding:10px 14px;letter-spacing:.15em;width:100%;text-transform:uppercase;outline:none;">
+        <button onclick="submitScore()" style="background:linear-gradient(135deg,#c8233a,#e8354e);border:none;color:#fff;font-family:'Cinzel',serif;font-size:12px;font-weight:700;padding:12px;letter-spacing:.3em;cursor:pointer;width:100%;">
+          SUBMIT SCORE
+        </button>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button onclick="saveGame()" style="background:rgba(201,153,58,0.1);border:1px solid rgba(201,153,58,0.3);color:#c9993a;font-family:'Share Tech Mono',monospace;font-size:10px;padding:11px;letter-spacing:.2em;cursor:pointer;">
+          💾 SAVE GAME
+        </button>
+        <button onclick="deleteSave()" style="background:transparent;border:1px solid rgba(255,255,255,0.08);color:#7a7068;font-family:'Share Tech Mono',monospace;font-size:9px;padding:10px;letter-spacing:.2em;cursor:pointer;">
+          🗑 DELETE SAVE DATA
+        </button>
+        <button onclick="document.getElementById('lb-modal').remove()" style="background:transparent;border:1px solid rgba(255,255,255,0.08);color:#7a7068;font-family:'Share Tech Mono',monospace;font-size:9px;padding:10px;letter-spacing:.2em;cursor:pointer;">
+          ← CLOSE
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+function submitScore(){
+  const input = document.getElementById('lb-name-input');
+  const name = (input ? input.value.trim().toUpperCase() : '') || 'ANONYMOUS';
+  if(!name){ toast('ENTER YOUR NAME FIRST'); return; }
+  const ranks = ['F','C','B','A','S','S+'];
+  let ri=0;
+  if(G.wins>=15&&G.ghosts>=10) ri=5;
+  else if(G.wins>=12) ri=4;
+  else if(G.wins>=8) ri=3;
+  else if(G.wins>=5) ri=2;
+  else if(G.wins>=2) ri=1;
+  addLeaderboardEntry(name, calcScore(), G.totalLoot, G.wins, ranks[ri]);
+  toast(`🏆 ${name} ADDED TO LEADERBOARD!`);
+  setTimeout(()=>{ document.getElementById('lb-modal').remove(); showLeaderboard(); }, 800);
+}
+
+// ============================================================
+//  PATCH SPLASH BUTTONS & SAVE INDICATOR
+// ============================================================
+function initSaveSystem(){
+  const loaded = loadGame();
+
+  // Add leaderboard + save buttons to splash
+  const sContent = document.querySelector('.s-content');
+  if(sContent){
+    // Replace the records button
+    const btns = sContent.querySelectorAll('.btn-s');
+    btns.forEach(b=>{ if(b.textContent.includes('RECORDS')) b.onclick = showLeaderboard; });
+  }
+
+  // Add save/load buttons to map header
+  const mapBtns = document.querySelector('.map-header-btns');
+  if(mapBtns){
+    const saveBtn = document.createElement('button');
+    saveBtn.className='hdr-btn';
+    saveBtn.textContent='💾 SAVE';
+    saveBtn.onclick=saveGame;
+    const lbBtn = document.createElement('button');
+    lbBtn.className='hdr-btn';
+    lbBtn.textContent='🏆 SCORES';
+    lbBtn.onclick=showLeaderboard;
+    mapBtns.insertBefore(lbBtn, mapBtns.firstChild);
+    mapBtns.insertBefore(saveBtn, mapBtns.firstChild);
+  }
+
+  // Show save indicator on splash if save exists
+  if(loaded){
+    const info = getSaveInfo();
+    if(info){
+      const indicator = document.createElement('div');
+      indicator.style.cssText='position:absolute;top:14px;right:14px;background:rgba(42,184,112,0.15);border:1px solid rgba(42,184,112,0.4);color:#2ab870;font-family:Share Tech Mono,monospace;font-size:8px;padding:5px 10px;letter-spacing:.2em;z-index:5;';
+      indicator.innerHTML=`💾 SAVE FOUND · ${info.wins||0} HEISTS COMPLETE`;
+      document.getElementById('splash').appendChild(indicator);
+    }
+    toast('💾 SAVE DATA LOADED');
+    renderMap();
+  }
+
+  // Auto-save on page unload
+  window.addEventListener('beforeunload', ()=>{
+    if(G.wins>0) saveGame();
+  });
+}
+
+// ============================================================
+//  ALL LEVELS COMPLETE CELEBRATION
+// ============================================================
+function showAllComplete(){
+  const modal = document.createElement('div');
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;gap:14px;';
+  modal.innerHTML=`
+    <div style="font-size:70px;animation:charFloat 3s ease-in-out infinite;">🎭</div>
+    <div style="font-family:'Cinzel',serif;font-size:clamp(22px,7vw,36px);color:#f0c060;letter-spacing:.12em;text-shadow:0 0 40px rgba(240,192,96,.6);">LEGEND ACHIEVED</div>
+    <div style="font-family:'Crimson Pro',serif;font-style:italic;font-size:14px;color:#7a7068;max-width:320px;line-height:1.8;">All 15 heists completed. From a city gallery to the most secure vault on earth — Jackal has taken it all. No witnesses. No evidence. No equal.</div>
+    <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,#c9993a,transparent);"></div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap;justify-content:center;">
+      <div style="text-align:center;"><div style="font-family:'Cinzel',serif;font-size:22px;color:#f0c060;">${fmt(G.totalLoot)}</div><div style="font-size:8px;color:#7a7068;letter-spacing:.2em;">TOTAL LOOT</div></div>
+      <div style="text-align:center;"><div style="font-family:'Cinzel',serif;font-size:22px;color:#f0c060;">${G.rep}</div><div style="font-size:8px;color:#7a7068;letter-spacing:.2em;">REPUTATION</div></div>
+      <div style="text-align:center;"><div style="font-family:'Cinzel',serif;font-size:22px;color:#f0c060;">${G.ghosts}</div><div style="font-size:8px;color:#7a7068;letter-spacing:.2em;">GHOST EXITS</div></div>
+      <div style="text-align:center;"><div style="font-family:'Cinzel',serif;font-size:22px;color:#f0c060;">${calcScore().toLocaleString()}</div><div style="font-size:8px;color:#7a7068;letter-spacing:.2em;">FINAL SCORE</div></div>
+    </div>
+    <button style="background:linear-gradient(135deg,#c8233a,#e8354e);border:none;color:#fff;font-family:'Cinzel',serif;font-size:13px;font-weight:700;padding:14px 40px;letter-spacing:.3em;cursor:pointer;clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);margin-top:8px;" onclick="this.parentElement.remove();showLeaderboard();">🏆 SUBMIT TO LEADERBOARD</button>
+    <button style="background:transparent;border:1px solid rgba(255,255,255,.1);color:#7a7068;font-family:'Share Tech Mono',monospace;font-size:9px;padding:10px 20px;letter-spacing:.2em;cursor:pointer;" onclick="this.parentElement.remove();">CLOSE</button>
+  \`;
+  document.body.appendChild(modal);
+  SFX.play('heistComplete');
+}
+
+// init
+renderMap();
+initSaveSystem();
+// Start ambient music after first user interaction
+document.addEventListener('click', function startOnFirstClick(){
+  SFX.startMusic();
+  document.removeEventListener('click', startOnFirstClick);
+}, {once:true});
+
+// Update version
+const verEl = document.querySelector('.s-ver');
+if(verEl) verEl.textContent = 'FULL BUILD v3.0 — 15 LEVELS · SOUND · CUTSCENES · SAVE';
+
+</script>
+</body>
+</html>
